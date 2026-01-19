@@ -23,7 +23,25 @@ Based on initial testing (January 2025), here are the planned improvements:
 - [x] No restart needed (Claude Code reads settings.json dynamically)
 - [x] Output: "Switched to [Provider]. Ready to use."
 
-### 3. Add "Anthropic API" as Provider Option
+### 3. Remove Wrapper Scripts, Use Direct CLI Commands
+**Problem**: The .sh wrapper scripts (check-gcloud.sh, etc.) show errors during setup, but running CLI commands directly works fine. This applies to all providers - gcloud, aws, and az CLIs are mature and Claude already knows how to use them.
+
+**Solution**:
+- [ ] Remove wrapper scripts from `scripts/` directory
+- [ ] Document commands directly in skill files instead
+- [ ] Let Claude run gcloud/aws/az commands directly and interpret output
+- [ ] Reduces permission prompts (no custom script execution)
+- [ ] Simpler debugging - fewer layers
+- [ ] Claude already knows these CLIs natively
+
+**Examples:**
+- Google: `gcloud auth application-default print-access-token`
+- AWS: `aws sts get-caller-identity`
+- Azure: `az account show`
+
+No need for wrapper scripts - just document the commands and let Claude run them.
+
+### 4. Add "Anthropic API" as Provider Option
 **Problem**: No easy way to switch back to default Anthropic API.
 
 **Solution**:
@@ -106,6 +124,8 @@ Alternative: Users can add permission rules to their `~/.claude/settings.json`:
 
 1. **No restart needed**: Changing `settings.json` takes effect immediately
 2. **Model availability varies**: Vertex AI has different models than Anthropic API
-3. **Opus 4.5 not on Vertex**: As of Jan 2025, `claude-opus-4-5-20251101` not available
-4. **Plugin loading**: Requires frontmatter in command files with `description` field
-5. **Naming convention**: Plugin name + file name = command (e.g., `provider` + `setup.md` = `/provider:setup`)
+3. **Vertex AI onboarding friction**: Enabling Claude on Vertex requires a request flow through Google and Anthropic (likely for billing) - not just a simple "enable" button
+4. **Model ID format**: Vertex uses `@` separator (e.g., `claude-sonnet-4-5@20250929`), not `-`
+5. **Plugin loading**: Requires frontmatter in command files with `description` field
+6. **Naming convention**: Plugin name + file name = command (e.g., `provider` + `setup.md` = `/provider:setup`)
+7. **Wrapper scripts cause errors**: Running .sh scripts shows errors, but direct gcloud commands work fine
