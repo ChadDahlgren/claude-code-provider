@@ -81,6 +81,27 @@ Based on initial testing (January 2025), here are the planned improvements:
 - [x] Instant toggle for /provider:switch (no AI conversation, no restart needed)
 - [x] Model selection in Vertex setup (prevents invalid model errors)
 
+## Experimental
+
+### Permission Auto-Approval Hook
+Added `.claude-plugin/hooks/` with a PreToolUse hook to auto-approve plugin scripts.
+This may or may not work depending on how Claude Code handles plugin hooks.
+Alternative: Users can add permission rules to their `~/.claude/settings.json`:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash */scripts/check-gcloud*)",
+      "Bash(bash */scripts/apply-vertex*)",
+      "Bash(bash */scripts/toggle-provider*)",
+      "Bash(gcloud auth application-default:*)",
+      "Bash(gcloud projects list:*)"
+    ]
+  }
+}
+```
+
 ## Notes from Testing
 
 1. **No restart needed**: Changing `settings.json` takes effect immediately
