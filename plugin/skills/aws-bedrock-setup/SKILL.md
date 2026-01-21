@@ -41,9 +41,8 @@ us.anthropic.claude-opus-4-5-20251101-v1:0
 
 **Query available inference profiles:**
 ```bash
-aws bedrock list-inference-profiles --region us-west-2 \
-  --query "inferenceProfileSummaries[?contains(modelArn, 'anthropic')].[inferenceProfileId,inferenceProfileName]" \
-  --output table
+aws bedrock list-inference-profiles --region us-west-2 --output json | \
+  jq -r '.inferenceProfileSummaries[] | select(.inferenceProfileArn | contains("anthropic")) | [.inferenceProfileId, .inferenceProfileName] | @tsv'
 ```
 
 Always use the exact IDs returned by AWS.
@@ -164,8 +163,8 @@ aws configure list-profiles
 aws sts get-caller-identity --profile <profile>
 
 # List Claude models
-aws bedrock list-inference-profiles --region us-west-2 \
-  --query "inferenceProfileSummaries[?contains(modelArn, 'anthropic')]"
+aws bedrock list-inference-profiles --region us-west-2 --output json | \
+  jq '.inferenceProfileSummaries[] | select(.inferenceProfileArn | contains("anthropic"))'
 
 # Login
 aws sso login --profile <profile>

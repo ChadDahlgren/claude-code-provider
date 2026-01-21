@@ -125,7 +125,13 @@ Tell user: "Opening browser for SSO login. Complete the authentication in your b
 Query available Claude inference profiles:
 
 ```bash
-aws bedrock list-inference-profiles --region <region> --query "inferenceProfileSummaries[?contains(modelArn, 'anthropic')].[inferenceProfileId,inferenceProfileName]" --output text
+aws bedrock list-inference-profiles --profile <profile> --region <region> --output json | jq -r '.inferenceProfileSummaries[] | select(.inferenceProfileArn | contains("anthropic")) | [.inferenceProfileId, .inferenceProfileName] | @tsv'
+```
+
+This returns lines like:
+```
+us.anthropic.claude-3-haiku-20240307-v1:0    US Anthropic Claude 3 Haiku
+us.anthropic.claude-3-5-sonnet-20240620-v1:0 US Anthropic Claude 3.5 Sonnet
 ```
 
 Use `AskUserQuestion` with the models returned. **Use the exact `inferenceProfileId`** - don't modify it.
