@@ -188,9 +188,7 @@ Quick tips:
 If something breaks, set "CLAUDE_CODE_USE_BEDROCK": "0" in ~/.claude/settings.json
 ```
 
-Use `AskUserQuestion`:
-- "Setup complete. Please restart Claude Code. What would you like to do?"
-- Options: "Exit now (I'll restart)" / "Help me troubleshoot"
+**End of setup.** The user must restart Claude Code for changes to take effect.
 
 ---
 
@@ -353,9 +351,7 @@ Quick tips:
 If something breaks, set "CLAUDE_CODE_USE_VERTEX": "0" in ~/.claude/settings.json
 ```
 
-Use `AskUserQuestion`:
-- "Setup complete. Please restart Claude Code. What would you like to do?"
-- Options: "Exit now (I'll restart)" / "Help me troubleshoot"
+**End of setup.** The user must restart Claude Code for changes to take effect.
 
 ---
 
