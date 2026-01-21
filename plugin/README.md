@@ -1,59 +1,68 @@
-# Claude Provider Plugin
+# AWS Bedrock Plugin
 
-Configure Claude Code to use AWS Bedrock or Google Vertex AI.
+Configure Claude Code to use AWS Bedrock.
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/provider` | Setup wizard - configure a cloud provider |
-| `/provider:status` | Show current configuration and auth status |
-| `/provider:switch` | Switch between configured providers |
-| `/provider:refresh` | Re-authenticate your session |
-| `/provider:diagnose` | Run diagnostics and identify issues |
-| `/provider:reset` | Remove configuration and return to Anthropic API |
+| `/bedrock` | Setup wizard - configure AWS Bedrock |
+| `/bedrock:status` | Show current configuration and auth status |
+| `/bedrock:refresh` | Re-authenticate your SSO session |
+| `/bedrock:diagnose` | Run diagnostics and identify issues |
+| `/bedrock:reset` | Remove configuration and return to Anthropic API |
 
 ## Quick Start
 
-1. Run `/provider` to start the setup wizard
-2. Choose AWS Bedrock or Google Vertex AI
-3. Follow the prompts to authenticate and configure
+1. Run `/bedrock` to start the setup wizard
+2. Select or configure your AWS SSO profile
+3. Choose a region and model
 4. Restart Claude Code when prompted
 
 ## Requirements
 
-- **AWS Bedrock**: AWS CLI with SSO configured
-- **Google Vertex AI**: gcloud CLI with Application Default Credentials
+- AWS CLI installed (`brew install awscli`)
+- AWS SSO configured with Bedrock access
+- IAM permissions: `AmazonBedrockFullAccess` or equivalent
 
 ## Files
 
 ```
 plugin/
-├── commands/           # Slash command definitions
-│   ├── setup.md        # /provider - main setup wizard
-│   ├── status.md       # /provider:status
-│   ├── switch.md       # /provider:switch
-│   ├── refresh.md      # /provider:refresh
-│   ├── diagnose.md     # /provider:diagnose
-│   └── reset.md        # /provider:reset
-├── skills/             # Reference documentation
-│   ├── aws-bedrock-setup/
-│   │   └── SKILL.md    # AWS Bedrock reference
-│   └── google-vertex-setup/
-│       └── SKILL.md    # Google Vertex AI reference
-└── .claude-plugin/     # Plugin configuration
-    ├── plugin.json     # Plugin manifest
-    └── hooks/          # Permission hooks
+├── commands/
+│   ├── bedrock.md           # /bedrock - setup wizard
+│   ├── bedrock-status.md    # /bedrock:status
+│   ├── bedrock-refresh.md   # /bedrock:refresh
+│   ├── bedrock-diagnose.md  # /bedrock:diagnose
+│   └── bedrock-reset.md     # /bedrock:reset
+├── skills/
+│   └── aws-bedrock/
+│       └── SKILL.md         # AWS Bedrock reference
+└── .claude-plugin/
+    └── plugin.json          # Plugin manifest
 ```
 
 ## Configuration
 
-Settings are stored in `~/.claude/settings.json`. The plugin merges new settings without overwriting existing ones (MCP servers, hooks, etc.).
+Settings are stored in `~/.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_USE_BEDROCK": "1",
+    "AWS_PROFILE": "your-profile",
+    "AWS_REGION": "us-west-2",
+    "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-5-20251101-v1:0"
+  },
+  "bedrockAuthRefresh": "aws sso login --profile your-profile"
+}
+```
 
 ## Troubleshooting
 
-Run `/provider:diagnose` to check for issues. Common problems:
+Run `/bedrock:diagnose` to check for issues. Common problems:
 
-- **Auth expired**: Run `/provider:refresh`
-- **CLI not installed**: The setup wizard will offer to install via Homebrew
-- **Permission denied**: Contact your cloud administrator
+- **Auth expired**: Run `/bedrock:refresh`
+- **CLI not installed**: `brew install awscli`
+- **Permission denied**: Contact your AWS administrator
+- **Model not available**: Use inference profile with `global.` prefix

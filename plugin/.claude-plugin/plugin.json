@@ -1,7 +1,7 @@
 {
-  "name": "provider",
-  "description": "Configure Claude Code to use enterprise cloud providers (AWS Bedrock, Google Vertex AI)",
-  "version": "0.1.0",
+  "name": "bedrock",
+  "description": "Configure Claude Code to use AWS Bedrock",
+  "version": "1.0.0",
   "author": {
     "name": "Chad Dahlgren"
   },
@@ -10,8 +10,6 @@
   "keywords": [
     "aws",
     "bedrock",
-    "vertex",
-    "enterprise",
-    "provider"
+    "enterprise"
   ]
 }
