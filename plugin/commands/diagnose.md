@@ -86,10 +86,9 @@ System
 Authentication
   ✗ SSO session expired
 
-To fix:
-  aws sso login --profile cricut-dev
+To fix: aws sso login --profile cricut-dev
 
-Or run: /provider:refresh
+Or: /provider:refresh
 ```
 
 ---
@@ -165,8 +164,7 @@ System
 Authentication
   ✗ Not authenticated
 
-To fix:
-  gcloud auth application-default login
+To fix: gcloud auth application-default login
 
-Or run: /provider:refresh
+Or: /provider:refresh
 ```

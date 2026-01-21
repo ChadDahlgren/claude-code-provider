@@ -61,10 +61,10 @@ If yes, read settings and update the `CLAUDE_CODE_USE_*` flags:
 
 **Successful switch:**
 ```
-Switched to <Provider Name>
+✓ Switched to <Provider Name>
 
-Previous: <Previous Provider>
-Current:  <New Provider>
+  Previous: <Previous Provider>
+  Current:  <New Provider>
 
 Ready to use immediately (no restart needed).
 ```
@@ -80,7 +80,7 @@ Run /provider:status to see full configuration.
 ```
 No cloud providers configured
 
-To set up a provider, run: /provider
+To set up a provider: /provider
 ```
 
 ## Provider Names

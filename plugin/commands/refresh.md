@@ -89,7 +89,7 @@ To configure a provider, run: /provider
 
 Available profiles: <list from aws configure list-profiles>
 
-Fix: Run /provider to reconfigure with a valid profile.
+To fix: /provider to reconfigure with a valid profile
 ```
 
 **SSO session expired (browser closed without completing):**
@@ -97,7 +97,8 @@ Fix: Run /provider to reconfigure with a valid profile.
 ✗ SSO login cancelled or timed out
 
 The browser authentication did not complete.
-Try again: /provider:refresh
+
+To fix: /provider:refresh
 ```
 
 **Network timeout:**
@@ -105,7 +106,8 @@ Try again: /provider:refresh
 ✗ Network error during authentication
 
 Check your internet connection, VPN, or corporate firewall.
-Try again: /provider:refresh
+
+To fix: /provider:refresh
 ```
 
 **SSO portal unreachable:**
@@ -114,7 +116,8 @@ Try again: /provider:refresh
 
 Verify your SSO start URL is correct.
 Current profile: <profile>
-Reconfigure: /provider
+
+To fix: /provider to reconfigure
 ```
 
 ### Google Vertex AI Errors
@@ -123,8 +126,9 @@ Reconfigure: /provider
 ```
 ✗ gcloud CLI not installed
 
-Install with: brew install google-cloud-sdk
-Then retry: /provider:refresh
+Install: brew install google-cloud-sdk
+
+To fix: /provider:refresh after installing
 ```
 
 **Browser auth cancelled:**
@@ -132,7 +136,8 @@ Then retry: /provider:refresh
 ✗ Authentication cancelled
 
 The browser authentication did not complete.
-Try again: /provider:refresh
+
+To fix: /provider:refresh
 ```
 
 **Network timeout:**
@@ -140,15 +145,17 @@ Try again: /provider:refresh
 ✗ Network error during authentication
 
 Check your internet connection, VPN, or corporate firewall.
-Try again: /provider:refresh
+
+To fix: /provider:refresh
 ```
 
 **Invalid project:**
 ```
 ✗ Project "<project>" not found or inaccessible
 
-List available projects: gcloud projects list
-Reconfigure: /provider
+List projects: gcloud projects list
+
+To fix: /provider to reconfigure
 ```
 
 ### Generic Errors
@@ -159,5 +166,5 @@ Reconfigure: /provider
 
 Error: <error message from CLI>
 
-Run /provider:diagnose for detailed troubleshooting.
+To fix: /provider:diagnose for detailed troubleshooting
 ```

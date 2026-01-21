@@ -63,11 +63,9 @@ Active Provider
 
 ⚠ Your SSO session has expired
 
-To re-authenticate:
-  /provider:refresh
+To fix: /provider:refresh
 
-Or run manually:
-  aws sso login --profile <profile>
+Or manually: aws sso login --profile <profile>
 ```
 
 ## Google Vertex AI Active
@@ -104,11 +102,9 @@ Active Provider
 
 ⚠ Your credentials have expired
 
-To re-authenticate:
-  /provider:refresh
+To fix: /provider:refresh
 
-Or run manually:
-  gcloud auth application-default login
+Or manually: gcloud auth application-default login
 ```
 
 ## Configuration Reference
