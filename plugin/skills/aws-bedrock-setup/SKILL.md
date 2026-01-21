@@ -2,16 +2,14 @@
 
 Reference material for configuring Claude Code with AWS Bedrock.
 
-## Supported Regions
+## Regions
 
-| Region | Location | Notes |
-|--------|----------|-------|
-| us-west-2 | Oregon | **Recommended** - best availability |
-| us-east-1 | N. Virginia | Good availability |
-| eu-west-1 | Ireland | For European users |
-| eu-central-1 | Frankfurt | For European users |
-| ap-northeast-1 | Tokyo | For Asia-Pacific |
-| ap-southeast-2 | Sydney | For Australia/NZ |
+Choose a region closest to you for best latency. Bedrock supports many regions — check AWS console or run:
+```bash
+aws bedrock list-foundation-models --region us-west-2 --query 'modelSummaries[0]'
+```
+
+Common choices: `us-west-2`, `us-east-1`, `eu-west-1`, `ap-northeast-1`
 
 ## Inference Profiles (CRITICAL for Claude 4.5)
 

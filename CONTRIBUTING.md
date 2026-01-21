@@ -234,10 +234,4 @@ When adding features:
 
 ## Future Roadmap
 
-See `planning/specification.html` Section 7 for planned features:
-
-**Phase 2:** Google Vertex AI support
-**Phase 3:** Azure Foundry support
-**Phase 4:** Multi-provider switching
-
-Contributions aligned with this roadmap are especially welcome!
+Contributions to improve the AWS Bedrock and Google Vertex AI support are welcome!

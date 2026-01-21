@@ -36,7 +36,6 @@ Based on initial testing (January 2025), here are the planned improvements:
 **Examples:**
 - Google: `gcloud auth application-default print-access-token`
 - AWS: `aws sts get-caller-identity`
-- Azure: `az account show`
 
 ### 4. Refactor to Provider Playbooks
 **Problem**: Current setup.md is one giant file with all providers interleaved. Hard to maintain.
@@ -44,7 +43,6 @@ Based on initial testing (January 2025), here are the planned improvements:
 **Solution**: Each provider becomes a standalone markdown "playbook":
 - [ ] `skills/aws-bedrock-setup/SKILL.md` - Complete AWS playbook
 - [ ] `skills/google-vertex-setup/SKILL.md` - Complete Vertex playbook
-- [ ] `skills/azure-foundry-setup/SKILL.md` - Complete Azure playbook
 - [ ] `commands/setup.md` - Just asks "which provider?" and loads the right skill
 
 Benefits:
@@ -57,12 +55,11 @@ Benefits:
 **Problem**: No easy way to switch back to default Anthropic API.
 
 **Solution**:
-- [ ] Add option 4 to provider menu:
+- [ ] Add option 3 to provider menu:
   ```
   [1] AWS Bedrock
   [2] Google Vertex AI
-  [3] Azure Foundry (coming soon)
-  [4] Anthropic API (default)
+  [3] Anthropic API (default)
   ```
 - [ ] Selecting this disables all provider flags
 
@@ -85,17 +82,12 @@ Benefits:
 
 ## Low Priority
 
-### 7. Azure Foundry Support (Phase 3)
-- [ ] Research Azure Foundry requirements
-- [ ] Add setup flow
-- [ ] Add helper scripts
-
-### 8. Multi-Provider Profiles
+### 7. Multi-Provider Profiles
 - [ ] Save multiple provider configs
 - [ ] Quick switch between saved profiles
 - [ ] Profile names (e.g., "work-bedrock", "personal-vertex")
 
-### 9. Session Start Hook
+### 8. Session Start Hook
 - [ ] Warn if auth is expired on session start
 - [ ] Auto-prompt for refresh if needed
 

@@ -27,7 +27,6 @@ To configure a provider, run: /provider
 Supported providers:
   • AWS Bedrock
   • Google Vertex AI
-  • Azure Foundry (coming soon)
 ```
 
 ## AWS Bedrock Active
@@ -47,7 +46,6 @@ Active Provider
   Profile:      <profile>
   Region:       <region>
   Auth:         ✓ valid
-  Auto-refresh: on
 
 Commands: /provider:diagnose • /provider:switch • /provider:refresh
 ```
@@ -62,7 +60,6 @@ Active Provider
   Profile:      <profile>
   Region:       <region>
   Auth:         ✗ expired
-  Auto-refresh: on
 
 ⚠ Your SSO session has expired
 
@@ -90,7 +87,6 @@ Active Provider
   Project:      <project>
   Region:       <region>
   Auth:         ✓ valid
-  Auto-refresh: on
 
 Commands: /provider:diagnose • /provider:switch • /provider:refresh
 ```
@@ -105,7 +101,6 @@ Active Provider
   Project:      <project>
   Region:       <region>
   Auth:         ✗ expired
-  Auto-refresh: on
 
 ⚠ Your credentials have expired
 

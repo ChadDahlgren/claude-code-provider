@@ -7,15 +7,13 @@ Configure Claude Code to use enterprise cloud providers with ease.
 This plugin simplifies configuring Claude Code to use enterprise cloud providers through an interactive setup wizard. Currently supports:
 - ✓ AWS Bedrock
 - ✓ Google Vertex AI
-- ○ Azure Foundry (coming soon)
 
 ### Features
 
 - **Guided Setup Wizard** — Step-by-step configuration via `/provider` command
 - **Automatic Dependency Management** — Installs AWS CLI if missing (with permission)
 - **Profile Detection** — Discovers existing AWS SSO profiles
-- **Smart Defaults** — Recommends optimal Bedrock regions
-- **Auto-Refresh** — Configures credential refresh to prevent interruptions
+- **Smart Defaults** — Recommends optimal regions
 - **Diagnostics** — Troubleshoots issues with clear fix instructions
 
 ## Commands
@@ -73,7 +71,6 @@ claude-code-provider/
 - SSO profile detection and selection
 - Browser-based authentication flow
 - Bedrock region configuration
-- Auto-refresh setup
 - Comprehensive diagnostics
 
 ### Google Vertex AI ✓
@@ -82,13 +79,7 @@ claude-code-provider/
 - Project selection from your account
 - Vertex AI region configuration
 - Automatic API enablement
-- Auto-refresh setup
 - Comprehensive diagnostics
-
-## Future Roadmap
-
-- **Phase 3**: Azure Foundry support
-- **Phase 4**: Enhanced multi-provider switching
 
 ## License
 

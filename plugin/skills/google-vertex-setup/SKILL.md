@@ -2,15 +2,11 @@
 
 Reference material for configuring Claude Code with Google Vertex AI.
 
-## Supported Regions
+## Regions
 
-| Region | Location | Notes |
-|--------|----------|-------|
-| us-central1 | Iowa | **Recommended** - best availability |
-| us-east5 | Columbus | Good for east coast US |
-| europe-west1 | Belgium | For European users |
-| europe-west4 | Netherlands | For European users |
-| asia-southeast1 | Singapore | For Asia-Pacific |
+Choose a region closest to you for best latency. Check Vertex AI docs for current availability.
+
+Common choices: `us-central1`, `us-east5`, `europe-west1`, `asia-southeast1`
 
 ## Model Naming
 
@@ -111,6 +107,17 @@ If you get 404 on model calls:
 2. Search for "Claude"
 3. Click on a Claude model
 4. Click "Enable" and accept terms
+
+**Model Garden vs API**: Enabling the Vertex AI API (step above) gives you the infrastructure. Enabling Claude in Model Garden gives you access to Claude specifically. You need both.
+
+## Service Accounts (for automation)
+
+For CI/CD or server deployments, use a service account instead of user credentials:
+
+1. Create service account: `gcloud iam service-accounts create claude-code --project=<project>`
+2. Grant role: `gcloud projects add-iam-policy-binding <project> --member="serviceAccount:claude-code@<project>.iam.gserviceaccount.com" --role="roles/aiplatform.user"`
+3. Create key: `gcloud iam service-accounts keys create key.json --iam-account=claude-code@<project>.iam.gserviceaccount.com`
+4. Set env: `export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json`
 
 ## Troubleshooting
 
