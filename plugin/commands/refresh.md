@@ -79,12 +79,85 @@ Claude Code is using the default Anthropic API.
 To configure a provider, run: /provider
 ```
 
-## Errors
+## Error Handling
 
-**Auth fails:**
+### AWS Bedrock Errors
+
+**Profile not found:**
+```
+✗ Profile "<profile>" not found
+
+Available profiles: <list from aws configure list-profiles>
+
+Fix: Run /provider to reconfigure with a valid profile.
+```
+
+**SSO session expired (browser closed without completing):**
+```
+✗ SSO login cancelled or timed out
+
+The browser authentication did not complete.
+Try again: /provider:refresh
+```
+
+**Network timeout:**
+```
+✗ Network error during authentication
+
+Check your internet connection, VPN, or corporate firewall.
+Try again: /provider:refresh
+```
+
+**SSO portal unreachable:**
+```
+✗ Could not reach SSO portal
+
+Verify your SSO start URL is correct.
+Current profile: <profile>
+Reconfigure: /provider
+```
+
+### Google Vertex AI Errors
+
+**gcloud not found:**
+```
+✗ gcloud CLI not installed
+
+Install with: brew install google-cloud-sdk
+Then retry: /provider:refresh
+```
+
+**Browser auth cancelled:**
+```
+✗ Authentication cancelled
+
+The browser authentication did not complete.
+Try again: /provider:refresh
+```
+
+**Network timeout:**
+```
+✗ Network error during authentication
+
+Check your internet connection, VPN, or corporate firewall.
+Try again: /provider:refresh
+```
+
+**Invalid project:**
+```
+✗ Project "<project>" not found or inaccessible
+
+List available projects: gcloud projects list
+Reconfigure: /provider
+```
+
+### Generic Errors
+
+**Unknown failure:**
 ```
 ✗ Authentication failed
 
-Check your network and try again: /provider:refresh
-Or reconfigure: /provider
+Error: <error message from CLI>
+
+Run /provider:diagnose for detailed troubleshooting.
 ```

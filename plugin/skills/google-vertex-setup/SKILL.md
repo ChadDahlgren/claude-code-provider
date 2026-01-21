@@ -132,6 +132,11 @@ For CI/CD or server deployments, use a service account instead of user credentia
 | 404 on model call | Enable Claude in Model Garden (see above) |
 | Network timeout | Check internet connection, VPN, or corporate firewall |
 | Invalid model format | Use `@` separator: `claude-opus-4-5@20251101` (not `-`) |
+| Quota exceeded | Request quota increase in Cloud Console, or try different region |
+| Model not in region | Check Model Garden for region availability; try `us-central1` |
+| Token expired | `gcloud auth application-default login` (tokens last ~1 hour) |
+| Credentials file not found | Run `gcloud auth application-default login` to create ADC file |
+| Service account key invalid | Regenerate key or check `GOOGLE_APPLICATION_CREDENTIALS` path |
 
 ## gcloud CLI Installation
 

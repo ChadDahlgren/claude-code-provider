@@ -11,6 +11,7 @@ Configure Claude Code to use AWS Bedrock or Google Vertex AI.
 | `/provider:switch` | Switch between configured providers |
 | `/provider:refresh` | Re-authenticate your session |
 | `/provider:diagnose` | Run diagnostics and identify issues |
+| `/provider:reset` | Remove configuration and return to Anthropic API |
 
 ## Quick Start
 
@@ -33,7 +34,8 @@ plugin/
 │   ├── status.md       # /provider:status
 │   ├── switch.md       # /provider:switch
 │   ├── refresh.md      # /provider:refresh
-│   └── diagnose.md     # /provider:diagnose
+│   ├── diagnose.md     # /provider:diagnose
+│   └── reset.md        # /provider:reset
 ├── skills/             # Reference documentation
 │   ├── aws-bedrock-setup/
 │   │   └── SKILL.md    # AWS Bedrock reference
