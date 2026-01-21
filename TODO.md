@@ -87,9 +87,18 @@ Benefits:
 - [ ] Quick switch between saved profiles
 - [ ] Profile names (e.g., "work-bedrock", "personal-vertex")
 
-### 8. Session Start Hook
-- [ ] Warn if auth is expired on session start
-- [ ] Auto-prompt for refresh if needed
+### 8. Token Expiration Handling
+**Problem**: When AWS SSO token expires mid-session, Claude Code can't call Bedrock. Since Claude IS the AI, you can't use it to fix the problem. User must know to run `aws sso login` manually in a separate terminal.
+
+**Why it's hard**: SSO requires browser interaction — can't fully automate refresh.
+
+**Possible solutions**:
+- [ ] Pre-session hook: Check token validity at startup, prompt refresh if about to expire
+- [ ] Better error detection: When Bedrock returns auth error, show clear "run this command" instructions
+- [ ] Investigate if Claude Code uses `bedrockAuthRefresh` setting automatically
+- [ ] Consider proactive refresh reminder (e.g., "token expires in 1 hour")
+
+**Note**: The settings include `"bedrockAuthRefresh": "aws sso login --profile <profile>"` but unclear if Claude Code actually uses this for automatic refresh or if it's just documentation.
 
 ## Completed
 
