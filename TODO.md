@@ -27,19 +27,31 @@ Based on initial testing (January 2025), here are the planned improvements:
 **Problem**: The .sh wrapper scripts (check-gcloud.sh, etc.) show errors during setup, but running CLI commands directly works fine. This applies to all providers - gcloud, aws, and az CLIs are mature and Claude already knows how to use them.
 
 **Solution**:
-- [ ] Remove wrapper scripts from `scripts/` directory
-- [ ] Document commands directly in skill files instead
+- [x] Update setup.md to use direct CLI commands
+- [x] Document commands in setup.md for reference
+- [ ] Delete unnecessary scripts from `scripts/` directory
 - [ ] Let Claude run gcloud/aws/az commands directly and interpret output
 - [ ] Reduces permission prompts (no custom script execution)
-- [ ] Simpler debugging - fewer layers
-- [ ] Claude already knows these CLIs natively
 
 **Examples:**
 - Google: `gcloud auth application-default print-access-token`
 - AWS: `aws sts get-caller-identity`
 - Azure: `az account show`
 
-No need for wrapper scripts - just document the commands and let Claude run them.
+### 4. Refactor to Provider Playbooks
+**Problem**: Current setup.md is one giant file with all providers interleaved. Hard to maintain.
+
+**Solution**: Each provider becomes a standalone markdown "playbook":
+- [ ] `skills/aws-bedrock-setup/SKILL.md` - Complete AWS playbook
+- [ ] `skills/google-vertex-setup/SKILL.md` - Complete Vertex playbook
+- [ ] `skills/azure-foundry-setup/SKILL.md` - Complete Azure playbook
+- [ ] `commands/setup.md` - Just asks "which provider?" and loads the right skill
+
+Benefits:
+- New providers = new markdown file, no coding
+- Claude uses playbook as a guide
+- Easier to maintain and test independently
+- More elegant architecture
 
 ### 4. Add "Anthropic API" as Provider Option
 **Problem**: No easy way to switch back to default Anthropic API.

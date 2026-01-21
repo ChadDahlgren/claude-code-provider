@@ -57,6 +57,8 @@ Ask the user to choose. If they select:
 
 This section covers the complete flow for AWS Bedrock setup (when user selects option [1]).
 
+**IMPORTANT**: Use direct AWS CLI commands, not wrapper scripts. Use the `AskUserQuestion` tool for user choices when possible.
+
 ### Screen 2: Check AWS CLI
 
 Once user selects AWS Bedrock, check if AWS CLI is installed:
@@ -67,27 +69,11 @@ which aws && aws --version
 
 **If AWS CLI is NOT installed:**
 
-```
-❯ /provider
-Selected: AWS Bedrock
-
-Checking AWS configuration...
-
-✗ AWS CLI not installed
-
-AWS CLI is required. Install it?
-
-  [y] Yes, install with Homebrew
-  [m] I'll install it manually
-  [q] Cancel
-
-Choice [y]:
-```
-
-If user chooses:
-- `y` → Run `brew install awscli` and show installation progress
-- `m` → Tell them to install manually and run `/provider` again when done
-- `q` → Cancel
+Use `AskUserQuestion` tool:
+- Question: "AWS CLI is required but not installed. How would you like to proceed?"
+- Options:
+  - "Install with Homebrew" (runs `brew install awscli`)
+  - "I'll install it manually"
 
 **After successful installation (or if already installed):**
 
@@ -95,169 +81,122 @@ Continue to Screen 3.
 
 ### Screen 3: Check for Existing SSO Profiles
 
-Parse `~/.aws/config` for existing SSO profiles. Look for sections with `sso_start_url`.
+Check for existing SSO profiles:
 
-Use this bash command:
 ```bash
-grep -E "^\[profile |sso_start_url|sso_region|^region" ~/.aws/config
+cat ~/.aws/config 2>/dev/null | grep -E "^\[profile |sso_start_url|sso_region|^region"
 ```
 
 **If profiles found:**
 
-```
-❯ /provider
-Selected: AWS Bedrock
-
-Checking AWS configuration...
-
-✓ AWS CLI installed (v2.15.0)
-✓ Found existing SSO profiles
-
-Select a profile to use with Bedrock:
-
-  [1] cricut-dev - us-east-1
-  [2] cricut-prod - us-east-1
-  [3] personal - us-west-2
-
-  [n] Configure a new profile
-  [q] Cancel
-
-Choice:
-```
-
-List all SSO profiles found. Show profile name and their SSO region.
+Use `AskUserQuestion` tool with the profiles as options:
+- Question: "Select an AWS profile to use with Bedrock"
+- Options: List each profile found (e.g., "cricut-dev (us-east-1)", "cricut-prod (us-east-1)")
+- Add option: "Configure a new profile"
 
 **If NO profiles found:**
 
-```
-❯ /provider
-Selected: AWS Bedrock
-
-Checking AWS configuration...
-
-✓ AWS CLI installed (v2.15.0)
-! No SSO profiles found
-
-Let's set up AWS SSO.
-
-Enter your SSO start URL:
-  This is usually https://your-company.awsapps.com/start
-  Ask your IT team if you're not sure.
-
-SSO URL:
-```
+Tell the user: "No SSO profiles found. Let's set up AWS SSO."
 
 Continue to Fresh SSO Setup flow (Screen 3b).
 
 ### Screen 3b: Fresh SSO Setup (If No Profiles)
 
 **Step 1: Get SSO URL**
-Ask for SSO start URL (e.g., `https://company.awsapps.com/start`)
+Ask user for their SSO start URL (e.g., `https://company.awsapps.com/start`)
+Tell them: "Ask your IT team if you're not sure."
 
-**Step 2: Get SSO Region**
-```
-❯ /provider
-SSO URL: https://cricut.awsapps.com/start
-
-SSO Region:
-  Where your company's SSO is hosted (usually us-east-1)
-
-Region [us-east-1]:
-```
-
-Default to `us-east-1`.
-
-**Step 3: Run SSO Configuration**
+**Step 2: Run SSO Configuration**
 Use AWS CLI's interactive SSO setup:
 ```bash
-aws configure sso --profile <profile-name>
+aws configure sso
 ```
 
 This will:
-1. Open browser for authentication
-2. User selects account/role in browser (AWS handles this)
-3. Return with credentials
+1. Prompt for SSO URL and region
+2. Open browser for authentication
+3. User selects account/role in browser (AWS handles this)
+4. Prompt for profile name and default region
+5. Return with credentials saved
 
-**Step 4: Profile Name**
-```
-❯ /provider
-
-✓ Authentication successful
-  Account: 847293650183 (Development)
-
-Name for this profile:
-
-Profile name [claude-bedrock]:
-```
-
-Default to `claude-bedrock`.
-
-After getting the profile name, continue to Screen 4.
+After SSO setup completes, continue to Screen 4.
 
 ### Screen 4: Select Bedrock Region
 
-Show Bedrock region selection:
-
-```
-❯ /provider
-Profile: cricut-dev
-
-Select Bedrock region
-
-  [1] us-east-1 (N. Virginia)
-  [2] us-west-2 (Oregon) ← recommended
-  [3] eu-west-1 (Ireland)
-  [4] eu-central-1 (Frankfurt)
-  [5] ap-northeast-1 (Tokyo)
-  [6] ap-southeast-2 (Sydney)
-
-Region [2]:
-```
-
-Default to option `[2]` (us-west-2) as it has best Claude availability.
+Use `AskUserQuestion` tool:
+- Question: "Select a Bedrock region"
+- Options:
+  - "us-west-2 (Oregon) - Recommended"
+  - "us-east-1 (N. Virginia)"
+  - "eu-west-1 (Ireland)"
+  - "ap-northeast-1 (Tokyo)"
 
 ### Screen 5: Authenticate (Existing Profile)
 
 If using an existing profile, run SSO login:
 
-```
-❯ /provider
-Profile: cricut-dev • Region: us-west-2
-
-Authenticating...
-
-Running: aws sso login --profile cricut-dev
-
-Opening browser for SSO login...
-
-If the browser doesn't open, visit:
-  https://device.sso.us-east-1.amazonaws.com/?user_code=BMHT-GRXP
-
-Waiting for authentication...
-```
-
-Run:
 ```bash
 aws sso login --profile <profile-name>
 ```
 
-This opens the browser. Wait for completion.
+Tell user: "Opening browser for SSO login. Complete the authentication in your browser."
 
-### Screen 6: Apply Configuration
+Wait for the command to complete successfully.
 
-After successful authentication:
+### Screen 6: List Available Models
+
+Query Bedrock for available Claude models:
+
+```bash
+aws bedrock list-foundation-models --by-provider anthropic --region <region> --query "modelSummaries[*].modelId" --output text
+```
+
+This returns available Claude model IDs. Common ones:
+- `anthropic.claude-3-5-sonnet-20241022-v2:0`
+- `anthropic.claude-3-5-haiku-20241022-v1:0`
+- `anthropic.claude-3-opus-20240229-v1:0`
+- `anthropic.claude-3-sonnet-20240229-v1:0`
+
+Use `AskUserQuestion` tool with the returned models:
+- Question: "Select a Claude model for Bedrock"
+- Options: List the models returned by the query
+
+### Screen 7: Show Undo Instructions (CRITICAL)
+
+**Before applying any configuration**, show the user how to manually undo:
 
 ```
-❯ /provider
-Profile: cricut-dev • Region: us-west-2
+Before we switch to Bedrock, here's how to undo if needed:
 
-✓ Authentication successful
+Settings file: ~/.claude/settings.json
 
+To revert manually, change these values:
+  "CLAUDE_CODE_USE_BEDROCK": "0"
+
+Or delete these lines from the "env" section:
+  - CLAUDE_CODE_USE_BEDROCK
+  - AWS_PROFILE
+  - AWS_REGION
+  - ANTHROPIC_MODEL
+
+No restart needed - changes take effect immediately.
+
+Ready to proceed? [y/n]
+```
+
+Wait for user confirmation before applying.
+
+### Screen 8: Apply Configuration
+
+After user confirms:
+
+```
 Applying configuration...
 
 ✓ Enabled Bedrock mode
-✓ Set profile to cricut-dev
-✓ Set region to us-west-2
+✓ Set profile to <profile>
+✓ Set region to <region>
+✓ Set model to <model>
 ✓ Configured auto-refresh
 
 Saved to ~/.claude/settings.json
@@ -265,26 +204,22 @@ Saved to ~/.claude/settings.json
 
 **Write to `~/.claude/settings.json`:**
 
-You must:
-1. Read existing `~/.claude/settings.json` (if it exists)
-2. Merge in the new configuration (don't overwrite other settings!)
-3. Write back the complete JSON
+Read existing settings, merge new config (don't overwrite!):
 
-Add/update these fields:
 ```json
 {
   "env": {
     "CLAUDE_CODE_USE_BEDROCK": "1",
-    "AWS_PROFILE": "cricut-dev",
-    "AWS_REGION": "us-west-2"
+    "CLAUDE_CODE_USE_VERTEX": "0",
+    "AWS_PROFILE": "<profile>",
+    "AWS_REGION": "<region>",
+    "ANTHROPIC_MODEL": "<model-id>"
   },
-  "awsAuthRefresh": "aws sso login --profile cricut-dev"
+  "bedrockAuthRefresh": "aws sso login --profile <profile>"
 }
 ```
 
-Use the scripts in `scripts/` directory to help with this (see below).
-
-### Screen 7: Success
+### Screen 9: Success
 
 ```
 ────────────────────────────────────────────
@@ -292,31 +227,61 @@ Use the scripts in `scripts/` directory to help with this (see below).
 ────────────────────────────────────────────
 
   Provider:     AWS Bedrock
-  Profile:      cricut-dev
-  Region:       us-west-2
+  Profile:      <profile>
+  Region:       <region>
+  Model:        <model>
   Auto-refresh: on
 
-Restart required
-Exit Claude Code and run claude again to use Bedrock.
+Ready to use (no restart needed).
+
+If something breaks, edit ~/.claude/settings.json and set:
+  "CLAUDE_CODE_USE_BEDROCK": "0"
 
 Run /provider:status to check configuration anytime.
 ```
 
-## Helper Scripts
+## Direct CLI Commands Reference
 
-Use these scripts (in the `scripts/` directory) to handle low-level operations:
+Use these commands directly - no wrapper scripts needed.
 
-### Check AWS CLI
+### AWS Commands
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-aws-cli.sh
-```
-Returns: installed version or error
+# Check AWS CLI
+which aws && aws --version
 
-### Parse AWS Profiles
-```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/parse-aws-profiles.sh
+# List SSO profiles
+cat ~/.aws/config | grep -E "^\[profile "
+
+# Login with SSO
+aws sso login --profile <profile-name>
+
+# List available Claude models on Bedrock
+aws bedrock list-foundation-models --by-provider anthropic --region <region> --query "modelSummaries[*].modelId" --output text
+
+# Check identity
+aws sts get-caller-identity --profile <profile-name>
 ```
-Returns: JSON array of profiles with names and regions
+
+### GCP Commands
+```bash
+# Check gcloud CLI
+which gcloud && gcloud --version | head -1
+
+# Check authentication
+gcloud auth application-default print-access-token
+
+# Authenticate
+gcloud auth application-default login
+
+# List projects
+gcloud projects list --format="value(projectId)"
+
+# Enable Vertex AI API
+gcloud services enable aiplatform.googleapis.com --project=<project-id>
+
+# Check enabled APIs
+gcloud services list --enabled --project=<project-id> | grep aiplatform
+```
 
 ### Check SSO Session
 ```bash
@@ -377,32 +342,16 @@ This section covers the complete flow for Google Vertex AI setup (when user sele
 Once user selects Google Vertex AI, check if gcloud CLI is installed:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-gcloud.sh
+which gcloud && gcloud --version | head -1
 ```
 
 **If gcloud CLI is NOT installed:**
 
-```
-❯ /provider
-Selected: Google Vertex AI
-
-Checking Google Cloud configuration...
-
-✗ gcloud CLI not installed
-
-gcloud CLI is required. Install it?
-
-  [y] Yes, install with Homebrew
-  [m] I'll install it manually
-  [q] Cancel
-
-Choice [y]:
-```
-
-If user chooses:
-- `y` → Run `brew install google-cloud-sdk` and show installation progress
-- `m` → Tell them to install manually and run `/provider` again when done
-- `q` → Cancel
+Use `AskUserQuestion` tool:
+- Question: "gcloud CLI is required but not installed. How would you like to proceed?"
+- Options:
+  - "Install with Homebrew" (runs `brew install google-cloud-sdk`)
+  - "I'll install it manually"
 
 **After successful installation (or if already installed):**
 
@@ -413,50 +362,21 @@ Continue to Vertex Screen 2.
 Check if user has configured application-default credentials:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-gcloud-auth.sh
+gcloud auth application-default print-access-token 2>/dev/null
 ```
+
+If this returns a token, they're authenticated. If it fails, they need to authenticate.
 
 **If NOT authenticated:**
 
-```
-❯ /provider
-Selected: Google Vertex AI
+Tell user: "Let's authenticate with Google Cloud. This will open your browser."
 
-Checking Google Cloud configuration...
-
-✓ gcloud CLI installed (v462.0.1)
-! Application-default credentials not configured
-
-Let's authenticate with Google Cloud.
-
-Running: gcloud auth application-default login
-
-This will:
-  • Open browser for Google authentication
-  • Store credentials for API access
-  • Grant access to your Google Cloud projects
-
-Press Enter to continue or [q] to cancel:
-```
-
-Run the auth command:
+Run:
 ```bash
 gcloud auth application-default login
 ```
 
-This will open browser for authentication. Wait for completion.
-
-**If already authenticated:**
-
-```
-❯ /provider
-Selected: Google Vertex AI
-
-Checking Google Cloud configuration...
-
-✓ gcloud CLI installed (v462.0.1)
-✓ Application-default credentials configured
-```
+Wait for completion.
 
 Continue to Vertex Screen 3.
 
@@ -584,11 +504,17 @@ Continue to Vertex Screen 6.
 
 ### Vertex Screen 6: Check Claude Model Access
 
-After the API is enabled, check if Claude models are accessible:
+After the API is enabled, check if Claude models are accessible by making a test API call:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-claude-access.sh <project-id> <region>
+curl -s -X POST \
+  -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+  -H "Content-Type: application/json" \
+  "https://global-aiplatform.googleapis.com/v1/projects/<project-id>/locations/global/publishers/anthropic/models/claude-sonnet-4-5@20250929:rawPredict" \
+  -d '{"anthropic_version":"vertex-2023-10-16","messages":[{"role":"user","content":"hi"}],"max_tokens":1}'
 ```
+
+If this returns 404, Claude models need to be enabled in Model Garden.
 
 **If Claude models are NOT accessible (returns "not-enabled"):**
 
@@ -667,49 +593,62 @@ Default to option `[1]` (Claude Sonnet 4.5) as it's the best balance of capabili
 
 **IMPORTANT**: Do NOT allow selection of models that aren't available on Vertex AI. Specifically, `claude-opus-4-5-20251101` (Opus 4.5) is NOT available on Vertex.
 
-### Vertex Screen 8: Apply Configuration
+### Vertex Screen 8: Show Undo Instructions (CRITICAL)
+
+**Before applying any configuration**, show the user how to manually undo:
 
 ```
-❯ /provider
-Project: my-personal-project • Region: us-central1 • Model: Claude Sonnet 4
+Before we switch to Vertex AI, here's how to undo if needed:
 
-✓ Vertex AI API enabled
+Settings file: ~/.claude/settings.json
 
-Applying configuration...
+To revert manually, change these values:
+  "CLAUDE_CODE_USE_VERTEX": "0"
 
-✓ Enabled Vertex AI mode
-✓ Set project to my-personal-project
-✓ Set region to us-central1
-✓ Set model to claude-sonnet-4-20250514
-✓ Configured auto-refresh
+Or delete these lines from the "env" section:
+  - CLAUDE_CODE_USE_VERTEX
+  - GOOGLE_PROJECT_ID
+  - ANTHROPIC_VERTEX_REGION
+  - ANTHROPIC_MODEL
 
-Saved to ~/.claude/settings.json
+No restart needed - changes take effect immediately.
+
+Ready to proceed? [y/n]
 ```
 
-**Write to `~/.claude/settings.json`:**
+Wait for user confirmation before applying.
 
-Use the script:
-```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/apply-vertex-config.sh <project-id> <region> <model-id>
-```
+### Vertex Screen 9: Apply Configuration
 
-This will:
-1. Read existing `~/.claude/settings.json`
-2. Merge in the new configuration
-3. Add these fields:
+After user confirms, read and merge settings into `~/.claude/settings.json`:
+
 ```json
 {
   "env": {
     "CLAUDE_CODE_USE_VERTEX": "1",
-    "GOOGLE_PROJECT_ID": "my-personal-project",
-    "ANTHROPIC_VERTEX_REGION": "us-central1",
-    "ANTHROPIC_MODEL": "claude-sonnet-4-20250514"
+    "CLAUDE_CODE_USE_BEDROCK": "0",
+    "GOOGLE_PROJECT_ID": "<project-id>",
+    "ANTHROPIC_VERTEX_REGION": "<region>",
+    "ANTHROPIC_MODEL": "<model-id>"
   },
   "vertexAuthRefresh": "gcloud auth application-default login"
 }
 ```
 
-### Vertex Screen 9: Success
+Show progress:
+```
+Applying configuration...
+
+✓ Enabled Vertex AI mode
+✓ Set project to <project>
+✓ Set region to <region>
+✓ Set model to <model>
+✓ Configured auto-refresh
+
+Saved to ~/.claude/settings.json
+```
+
+### Vertex Screen 10: Success
 
 ```
 ────────────────────────────────────────────
@@ -717,12 +656,15 @@ This will:
 ────────────────────────────────────────────
 
   Provider:     Google Vertex AI
-  Project:      my-personal-project
-  Region:       us-central1
-  Model:        Claude Sonnet 4
+  Project:      <project>
+  Region:       <region>
+  Model:        <model>
   Auto-refresh: on
 
 Ready to use (no restart needed).
+
+If something breaks, edit ~/.claude/settings.json and set:
+  "CLAUDE_CODE_USE_VERTEX": "0"
 
 Run /provider:status to check configuration anytime.
 ```
