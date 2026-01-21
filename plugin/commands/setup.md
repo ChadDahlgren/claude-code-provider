@@ -287,10 +287,12 @@ Display this summary:
   Please exit Claude Code and restart it for Bedrock to take effect.
   Run: claude --plugin-dir <plugin-path>
 
-If something breaks after restart, edit ~/.claude/settings.json and set:
-  "CLAUDE_CODE_USE_BEDROCK": "0"
+Quick tips:
+  • /models — Switch models or see available Bedrock models
+  • /provider:status — Check your current configuration
 
-Run /provider:status after restart to verify configuration.
+If something breaks, edit ~/.claude/settings.json and set:
+  "CLAUDE_CODE_USE_BEDROCK": "0"
 ```
 
 **IMPORTANT**: End the setup by using `AskUserQuestion` tool:
@@ -720,10 +722,12 @@ Saved to ~/.claude/settings.json
   Please exit Claude Code and restart it for Vertex AI to take effect.
   Run: claude --plugin-dir <plugin-path>
 
-If something breaks after restart, edit ~/.claude/settings.json and set:
-  "CLAUDE_CODE_USE_VERTEX": "0"
+Quick tips:
+  • /models — Switch models or see available Vertex models
+  • /provider:status — Check your current configuration
 
-Run /provider:status after restart to verify configuration.
+If something breaks, edit ~/.claude/settings.json and set:
+  "CLAUDE_CODE_USE_VERTEX": "0"
 ```
 
 **IMPORTANT**: End the setup by using `AskUserQuestion` tool:
