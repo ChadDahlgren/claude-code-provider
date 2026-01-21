@@ -21,8 +21,7 @@ claude-code-bedrock/
 │   │       └── SKILL.md        # AWS Bedrock reference material
 │   └── README.md
 ├── dev/                        # Development tooling (not part of plugin)
-│   ├── scripts/                # Reset scripts for testing
-│   └── planning/               # Architecture docs
+│   └── scripts/                # Reset scripts for testing
 ├── README.md
 ├── CONTRIBUTING.md
 └── LICENSE
