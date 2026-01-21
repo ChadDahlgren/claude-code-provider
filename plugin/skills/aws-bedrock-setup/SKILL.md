@@ -120,26 +120,14 @@ Or use AWS managed policy: `AmazonBedrockFullAccess`
 
 **Always merge, never overwrite** - users may have MCP servers, hooks, etc.
 
-## Common Issues
+## Troubleshooting
 
-### Token Expired
-```bash
-aws sso login --profile <profile>
-```
-
-### Profile Not Found
-```bash
-aws configure list-profiles  # List available
-aws configure sso --profile <name>  # Create new
-```
-
-### Access Denied
-IAM role lacks Bedrock permissions. Ask administrator to attach `AmazonBedrockFullAccess` or custom policy.
-
-### Model Not Available
-- Check region supports the model
-- Use inference profile format for Claude 4.5
-- Query available models: `aws bedrock list-inference-profiles --region <region>`
+| Error | Fix |
+|-------|-----|
+| Token expired | `aws sso login --profile <profile>` |
+| Profile not found | `aws configure list-profiles` to list, `aws configure sso` to create |
+| Access denied | Ask admin for `AmazonBedrockFullAccess` policy |
+| Model not available | Use inference profile format (`us.anthropic...`), check region supports it |
 
 ## AWS CLI Installation
 

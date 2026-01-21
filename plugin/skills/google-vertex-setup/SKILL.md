@@ -56,7 +56,17 @@ Returns token = authenticated.
 
 Minimum role: **Vertex AI User** (`roles/aiplatform.user`)
 
-Permissions needed:
+Or custom policy:
+```json
+{
+  "bindings": [{
+    "role": "roles/aiplatform.user",
+    "members": ["user:you@example.com"]
+  }]
+}
+```
+
+Permissions included:
 - `aiplatform.endpoints.predict`
 - `aiplatform.models.get`
 
@@ -102,33 +112,16 @@ If you get 404 on model calls:
 3. Click on a Claude model
 4. Click "Enable" and accept terms
 
-## Common Issues
+## Troubleshooting
 
-### gcloud Not Found
-```bash
-brew install google-cloud-sdk
-```
-
-### Not Authenticated
-```bash
-gcloud auth application-default login
-```
-
-### Permission Denied
-Ask project admin for `roles/aiplatform.user` role, or use a different project.
-
-### Project Not Found
-```bash
-gcloud projects list  # List your projects
-```
-
-### API Not Enabled
-```bash
-gcloud services enable aiplatform.googleapis.com --project=<project>
-```
-
-### Billing Required
-Vertex AI requires billing. New users get $300 free credit.
+| Error | Fix |
+|-------|-----|
+| gcloud not found | `brew install google-cloud-sdk` |
+| Not authenticated | `gcloud auth application-default login` |
+| Permission denied | Ask admin for `roles/aiplatform.user`, or use different project |
+| Project not found | `gcloud projects list` to see available projects |
+| API not enabled | `gcloud services enable aiplatform.googleapis.com --project=<project>` |
+| Billing required | Enable billing; new users get $300 free credit |
 
 ## gcloud CLI Installation
 
