@@ -8,6 +8,7 @@ Configure Claude Code to use AWS Bedrock for Claude API access.
 
 ## Step 1: Check Prerequisites
 
+**Check AWS CLI:**
 ```bash
 which aws && aws --version
 ```
@@ -17,6 +18,17 @@ which aws && aws --version
 - Options: "Yes, install with Homebrew" / "No, I'll install manually"
 
 If yes: `brew install awscli`
+
+**Check jq:**
+```bash
+which jq && jq --version
+```
+
+**Not installed?** Use `AskUserQuestion`:
+- "jq is required for parsing AWS responses. Install it now?"
+- Options: "Yes, install with Homebrew" / "No, I'll install manually"
+
+If yes: `brew install jq`
 
 ## Step 2: Select or Create Profile
 

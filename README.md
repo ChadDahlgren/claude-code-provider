@@ -1,85 +1,85 @@
-# Claude Provider Plugin
+# Claude Code Bedrock Plugin
 
-Configure Claude Code to use enterprise cloud providers with ease.
+Configure Claude Code to use AWS Bedrock with ease.
 
 ## What This Plugin Does
 
-This plugin simplifies configuring Claude Code to use enterprise cloud providers through an interactive setup wizard. Currently supports:
-- ✓ AWS Bedrock
-- ✓ Google Vertex AI
+This plugin simplifies configuring Claude Code to use AWS Bedrock through an interactive setup wizard.
 
 ### Features
 
-- **Guided Setup Wizard** — Step-by-step configuration via `/provider` command
-- **Automatic Dependency Management** — Installs AWS CLI if missing (with permission)
+- **Guided Setup Wizard** — Step-by-step configuration via `/bedrock` command
+- **Automatic Dependency Check** — Verifies AWS CLI and jq are installed
 - **Profile Detection** — Discovers existing AWS SSO profiles
-- **Smart Defaults** — Recommends optimal regions
+- **Smart Defaults** — Recommends optimal regions and inference profiles
 - **Diagnostics** — Troubleshoots issues with clear fix instructions
 
 ## Commands
 
-- `/provider` — Main setup wizard
-- `/provider:status` — Show current configuration
-- `/provider:diagnose` — Run diagnostics and identify issues
-- `/provider:refresh` — Re-authenticate SSO session
-- `/provider:switch` — Switch between configured providers (coming soon)
+| Command | Description |
+|---------|-------------|
+| `/bedrock` | Setup wizard - configure AWS Bedrock |
+| `/bedrock:status` | Show current configuration and auth status |
+| `/bedrock:refresh` | Re-authenticate your SSO session |
+| `/bedrock:diagnose` | Run diagnostics and identify issues |
+| `/bedrock:reset` | Remove configuration and return to Anthropic API |
 
 ## Installation
 
 1. Clone this repository
 2. Run Claude Code with the plugin:
    ```bash
-   claude --plugin-dir /path/to/claude-code-provider/plugin
+   claude --plugin-dir /path/to/claude-code-bedrock/plugin
    ```
 3. Run the setup:
    ```
-   /provider:setup
+   /bedrock
    ```
 
 ## Project Structure
 
 ```
-claude-code-provider/
+claude-code-bedrock/
 ├── plugin/                 # The distributable plugin
-│   ├── commands/           # Slash commands (/provider:setup, etc.)
+│   ├── commands/           # Slash commands (/bedrock, etc.)
 │   ├── skills/             # Reference documentation for AI
 │   └── .claude-plugin/     # Plugin manifest and hooks
-├── dev/                    # Development tooling (not part of plugin)
-│   ├── scripts/            # Reset scripts, test helpers
-│   └── planning/           # Architecture docs
 ├── README.md
-├── CONTRIBUTING.md
 └── LICENSE
 ```
 
 ## Requirements
 
 - macOS (Homebrew support for CLI installations)
-- **For AWS Bedrock**: AWS account with SSO configured (or we'll help you set it up)
-- **For Google Vertex AI**: Google Cloud account with a project and billing enabled
+- AWS CLI installed (`brew install awscli`)
+- jq installed (`brew install jq`)
+- AWS SSO configured with Bedrock access
+- IAM permissions: `AmazonBedrockFullAccess` or equivalent
 
-## Design Principles
+## Configuration
 
-- User never sees environment variable names — only friendly labels
-- Defaults in brackets like `[2]` so you can just press Enter
-- Only status indicators: ✓ ✗ ● ○ (no decorative emojis)
-- Plugin handles all complexity — you just answer simple questions
+Settings are stored in `~/.claude/settings.json`:
 
-## Current Features
+```json
+{
+  "env": {
+    "CLAUDE_CODE_USE_BEDROCK": "1",
+    "AWS_PROFILE": "your-profile",
+    "AWS_REGION": "us-west-2",
+    "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-5-20251101-v1:0"
+  },
+  "bedrockAuthRefresh": "aws sso login --profile your-profile"
+}
+```
 
-### AWS Bedrock ✓
-- SSO profile detection and selection
-- Browser-based authentication flow
-- Bedrock region configuration
-- Comprehensive diagnostics
+## Troubleshooting
 
-### Google Vertex AI ✓
-- gcloud CLI integration
-- Application-default credentials setup
-- Project selection from your account
-- Vertex AI region configuration
-- Automatic API enablement
-- Comprehensive diagnostics
+Run `/bedrock:diagnose` to check for issues. Common problems:
+
+- **Auth expired**: Run `/bedrock:refresh`
+- **CLI not installed**: `brew install awscli`
+- **Permission denied**: Contact your AWS administrator
+- **Model not available**: Use inference profile with `global.` prefix
 
 ## License
 

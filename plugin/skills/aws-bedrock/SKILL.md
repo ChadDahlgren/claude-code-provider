@@ -104,7 +104,6 @@ Or use AWS managed policy: `AmazonBedrockFullAccess`
 {
   "env": {
     "CLAUDE_CODE_USE_BEDROCK": "1",
-    "CLAUDE_CODE_USE_VERTEX": "0",
     "AWS_PROFILE": "my-profile-name",
     "AWS_REGION": "us-west-2",
     "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-5-20251101-v1:0"
