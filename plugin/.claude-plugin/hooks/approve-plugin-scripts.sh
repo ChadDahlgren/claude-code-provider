@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-approve bash commands that run this plugin's scripts
+# Auto-approve bash commands used by the provider plugin
 # This hook receives JSON input on stdin and outputs a decision
 
 set -euo pipefail
@@ -10,37 +10,34 @@ INPUT=$(cat)
 # Extract the command being run
 COMMAND=$(echo "$INPUT" | grep -o '"command"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*: *"//' | sed 's/"$//' || echo "")
 
-# Check if this is one of our plugin scripts
-# Our scripts are in ${CLAUDE_PLUGIN_ROOT}/scripts/
-if [[ "$COMMAND" == *'${CLAUDE_PLUGIN_ROOT}/scripts/'* ]] || \
-   [[ "$COMMAND" == *'/claude-code-provider/scripts/'* ]] || \
-   [[ "$COMMAND" == *'check-gcloud'* ]] || \
-   [[ "$COMMAND" == *'check-gcloud-auth'* ]] || \
-   [[ "$COMMAND" == *'get-gcloud-projects'* ]] || \
-   [[ "$COMMAND" == *'apply-vertex-config'* ]] || \
-   [[ "$COMMAND" == *'list-vertex-models'* ]] || \
-   [[ "$COMMAND" == *'toggle-provider'* ]] || \
-   [[ "$COMMAND" == *'check-aws-cli'* ]] || \
-   [[ "$COMMAND" == *'parse-aws-profiles'* ]] || \
-   [[ "$COMMAND" == *'check-sso-session'* ]] || \
-   [[ "$COMMAND" == *'apply-config'* ]]; then
+# AWS CLI commands used by provider setup/status/diagnose
+if [[ "$COMMAND" == *'aws --version'* ]] || \
+   [[ "$COMMAND" == *'which aws'* ]] || \
+   [[ "$COMMAND" == *'aws configure list-profiles'* ]] || \
+   [[ "$COMMAND" == *'aws configure get region'* ]] || \
+   [[ "$COMMAND" == *'aws sso login'* ]] || \
+   [[ "$COMMAND" == *'aws sts get-caller-identity'* ]] || \
+   [[ "$COMMAND" == *'aws bedrock list-inference-profiles'* ]] || \
+   [[ "$COMMAND" == *'aws bedrock list-foundation-models'* ]]; then
 
-    # Auto-approve our plugin scripts
     cat << 'EOF'
 {
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": "allow",
-    "permissionDecisionReason": "Provider plugin script"
+    "permissionDecisionReason": "Provider plugin AWS command"
   }
 }
 EOF
     exit 0
 fi
 
-# Also auto-approve gcloud commands used by our plugin
-if [[ "$COMMAND" == *'gcloud auth application-default'* ]] || \
+# Google Cloud CLI commands used by provider setup/status/diagnose
+if [[ "$COMMAND" == *'gcloud --version'* ]] || \
+   [[ "$COMMAND" == *'which gcloud'* ]] || \
+   [[ "$COMMAND" == *'gcloud auth application-default'* ]] || \
    [[ "$COMMAND" == *'gcloud projects list'* ]] || \
+   [[ "$COMMAND" == *'gcloud projects describe'* ]] || \
    [[ "$COMMAND" == *'gcloud config get-value'* ]] || \
    [[ "$COMMAND" == *'gcloud services enable aiplatform'* ]] || \
    [[ "$COMMAND" == *'gcloud services list'* ]]; then
@@ -57,18 +54,16 @@ EOF
     exit 0
 fi
 
-# Also auto-approve aws commands used by our plugin
-if [[ "$COMMAND" == *'aws sso login'* ]] || \
-   [[ "$COMMAND" == *'aws --version'* ]] || \
-   [[ "$COMMAND" == *'which aws'* ]] || \
-   [[ "$COMMAND" == *'which gcloud'* ]]; then
+# Homebrew installs for CLIs
+if [[ "$COMMAND" == *'brew install awscli'* ]] || \
+   [[ "$COMMAND" == *'brew install google-cloud-sdk'* ]]; then
 
     cat << 'EOF'
 {
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": "allow",
-    "permissionDecisionReason": "Provider plugin AWS/gcloud command"
+    "permissionDecisionReason": "Provider plugin CLI installation"
   }
 }
 EOF

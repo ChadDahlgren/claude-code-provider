@@ -4,33 +4,58 @@ description: Switch between configured cloud providers
 
 # Provider Switch Command
 
-Instantly toggle between configured cloud providers. No AI conversation needed - just flip the setting.
+Toggle between configured cloud providers.
 
-## Your Role
+## Behavior
 
-Run the toggle script and report the result. This is a direct action, not a conversation.
+When user runs `/provider:switch`:
 
-## CRITICAL: Execute Immediately
+1. Read `~/.claude/settings.json`
+2. Determine current provider and available providers
+3. Switch to next provider in cycle (or specified target)
+4. Update settings.json
+5. Report result
 
-When user runs `/provider:switch`, execute this command **immediately without any preamble**:
+## Cycle Order
+
+`Anthropic API → Vertex (if configured) → Bedrock (if configured) → Anthropic API`
+
+Skip providers that aren't configured.
+
+## Usage
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/toggle-provider.sh
+/provider:switch           # Cycle to next provider
+/provider:switch vertex    # Switch to Vertex AI
+/provider:switch bedrock   # Switch to Bedrock
+/provider:switch anthropic # Switch to Anthropic API
 ```
 
-Or with a specific target:
-```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/toggle-provider.sh vertex
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/toggle-provider.sh bedrock
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/toggle-provider.sh anthropic
+## Implementation
+
+Read settings, then update the `CLAUDE_CODE_USE_*` flags:
+
+**To switch to Bedrock:**
+```json
+"CLAUDE_CODE_USE_BEDROCK": "1",
+"CLAUDE_CODE_USE_VERTEX": "0"
 ```
 
-## Output Handling
+**To switch to Vertex:**
+```json
+"CLAUDE_CODE_USE_BEDROCK": "0",
+"CLAUDE_CODE_USE_VERTEX": "1"
+```
 
-### Successful Switch
-Script output: `switched:<from>:<to>`
+**To switch to Anthropic API:**
+```json
+"CLAUDE_CODE_USE_BEDROCK": "0",
+"CLAUDE_CODE_USE_VERTEX": "0"
+```
 
-Display:
+## Output
+
+**Successful switch:**
 ```
 Switched to <Provider Name>
 
@@ -40,93 +65,22 @@ Current:  <New Provider>
 Ready to use immediately (no restart needed).
 ```
 
-Provider name mapping:
-- `vertex` → Google Vertex AI
-- `bedrock` → AWS Bedrock
-- `anthropic` → Anthropic API (default)
-
-### Already On Target
-Script output: `current:<provider>`
-
-Display:
+**Already on target:**
 ```
 Already using <Provider Name>
 
 Run /provider:status to see full configuration.
 ```
 
-### No Providers Configured
-Script output: `error:no-providers-configured`
-
-Display:
+**No providers configured:**
 ```
 No cloud providers configured
 
-To set up a provider, run: /provider:setup
+To set up a provider, run: /provider
 ```
 
-### No Settings File
-Script output: `error:no-settings`
+## Provider Names
 
-Display:
-```
-Settings file not found
-
-Run /provider:setup to configure a provider.
-```
-
-## Examples
-
-### Auto-cycle (no argument)
-```
-> /provider:switch
-
-Switched to Google Vertex AI
-
-Previous: Anthropic API (default)
-Current:  Google Vertex AI
-
-Ready to use immediately (no restart needed).
-```
-
-### Switch to specific provider
-```
-> /provider:switch anthropic
-
-Switched to Anthropic API
-
-Previous: Google Vertex AI
-Current:  Anthropic API (default)
-
-Ready to use immediately (no restart needed).
-```
-
-### Already on that provider
-```
-> /provider:switch vertex
-
-Already using Google Vertex AI
-
-Run /provider:status to see full configuration.
-```
-
-## Design Rules
-
-- **No menu** — Just toggle, no selection UI
-- **No restart reminder** — Settings apply immediately
-- **Instant feedback** — Show what changed in 2-3 lines
-- **No emojis** — Clean, professional output
-
-## Cycle Order
-
-When no target specified, cycles through:
-1. Anthropic API → Vertex (if configured) → Bedrock (if configured) → Anthropic API
-2. Skip providers that aren't configured
-3. If only one provider configured, toggle between it and Anthropic API
-
-## Technical Notes
-
-- Settings changes in `~/.claude/settings.json` apply immediately
-- No need to restart Claude Code
-- Script uses jq if available, falls back to sed
-- All provider configs are preserved (just the USE_* flags change)
+- `vertex` → Google Vertex AI
+- `bedrock` → AWS Bedrock
+- `anthropic` → Anthropic API (default)
