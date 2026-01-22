@@ -6,15 +6,34 @@ description: Show current AWS Bedrock configuration and authentication status
 
 Show the current AWS Bedrock configuration and authentication status.
 
-## Behavior
+## Check Status
 
-1. Read `~/.claude/settings.json`
-2. Check if Bedrock is configured
-3. Check authentication status
-4. Display configuration summary
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/dist/index.js test-bedrock
+```
 
-## Not Configured
+**Response format:**
+```json
+{
+  "success": true,
+  "data": {
+    "configured": true,
+    "profile": "profile-name",
+    "region": "us-west-2",
+    "model": "global.anthropic.claude-opus-4-5-20251101-v1:0",
+    "checks": {
+      "credentials": { "passed": true, "message": "Authenticated as arn:aws:..." },
+      "bedrockAccess": { "passed": true, "message": "Access to 53 inference profile(s)" },
+      "modelAvailable": { "passed": true, "message": "Model ... is available" }
+    },
+    "allPassed": true
+  }
+}
+```
 
+## Display Based on Response
+
+**If `configured: false`:**
 ```
 Bedrock Status
 ────────────────────────────────────────────
@@ -26,14 +45,7 @@ AWS Bedrock is not set up.
 To configure: /bedrock
 ```
 
-## Configured - Auth Valid
-
-Check auth status:
-```bash
-aws sts get-caller-identity --profile <AWS_PROFILE> 2>&1
-```
-
-**Auth valid:**
+**If `allPassed: true`:**
 ```
 Bedrock Status
 ────────────────────────────────────────────
@@ -46,9 +58,7 @@ Bedrock Status
 Commands: /bedrock:diagnose • /bedrock:refresh • /bedrock:reset
 ```
 
-## Configured - Auth Expired
-
-**Auth expired:**
+**If `allPassed: false`:**
 ```
 Bedrock Status
 ────────────────────────────────────────────
@@ -56,26 +66,13 @@ Bedrock Status
   Profile:  <profile>
   Region:   <region>
   Model:    <model>
-  Auth:     ✗ expired
 
-⚠ Your SSO session has expired
-
-To fix: /bedrock:refresh
-
-Or manually: aws sso login --profile <profile>
+Issues detected:
 ```
 
-## Configuration Reference
+Then show each check that has `passed: false` with its `message`.
 
-**Settings in ~/.claude/settings.json:**
-```json
-{
-  "env": {
-    "CLAUDE_CODE_USE_BEDROCK": "1",
-    "AWS_PROFILE": "profile-name",
-    "AWS_REGION": "us-west-2",
-    "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-5-20251101-v1:0"
-  },
-  "awsAuthRefresh": "aws sso login --profile profile-name"
-}
-```
+**Common issues:**
+- `credentials.passed: false` → Run `/bedrock:refresh`
+- `bedrockAccess.passed: false` → Check IAM permissions
+- `modelAvailable.passed: false` → Model may have been removed, run `/bedrock` to reconfigure

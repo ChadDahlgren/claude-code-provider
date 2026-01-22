@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Auto-approve READ-ONLY bash commands used by the Bedrock plugin
-# Commands that modify system state require user approval
+# Auto-approve commands used by the Bedrock plugin
 # This hook receives JSON input on stdin and outputs a decision
 
 set -euo pipefail
@@ -8,14 +7,42 @@ set -euo pipefail
 # Read the JSON input from Claude Code
 INPUT=$(cat)
 
-# Extract the command using jq (more reliable than grep/sed)
+# Extract the command using jq
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null || echo "")
 
+# Get the plugin root directory (this script's parent's parent)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="$(dirname "$SCRIPT_DIR")"
+PLUGIN_ROOT="$(dirname "$PLUGIN_ROOT")"
+
+# Approve helper function
+approve() {
+    cat << 'EOF'
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow",
+    "permissionDecisionReason": "Bedrock plugin approved command"
+  }
+}
+EOF
+    exit 0
+}
+
+# Check if command is our TypeScript scripts
+is_plugin_script() {
+    local cmd="$1"
+    # Match: node <path>/scripts/dist/index.js <anything>
+    if [[ "$cmd" == "node "* ]] && [[ "$cmd" == *"/scripts/dist/index.js"* ]]; then
+        return 0
+    fi
+    return 1
+}
+
 # Security: Reject compound commands that could hide malicious code
-# Check for shell operators that chain commands
 has_dangerous_patterns() {
     local cmd="$1"
-    # Strip safe stderr redirects before checking for dangerous patterns
+    # Strip safe stderr redirects before checking
     local sanitized="${cmd//2>&1/}"
     sanitized="${sanitized//2>\/dev\/null/}"
     # Reject: semicolon, &&, ||, pipe, subshell, backticks, redirection, newlines
@@ -33,58 +60,39 @@ has_dangerous_patterns() {
     return 1  # Safe
 }
 
-# Check if command starts with an allowed pattern
-is_allowed_command() {
+# Check if command is an allowed AWS CLI read-only command
+is_allowed_aws_command() {
     local cmd="$1"
-    # Allowed read-only commands (must be at start of command)
     case "$cmd" in
+        # Version checks
         "aws --version"*) return 0 ;;
         "which aws"*) return 0 ;;
-        "which jq"*) return 0 ;;
-        "jq --version"*) return 0 ;;
-        "jq "*) return 0 ;;
+        # Identity and config (read-only)
         "aws sts get-caller-identity"*) return 0 ;;
         "aws configure list-profiles"*) return 0 ;;
         "aws configure get "*) return 0 ;;
         "aws configure export-credentials"*) return 0 ;;
+        # Bedrock queries (read-only)
         "aws bedrock list-inference-profiles"*) return 0 ;;
         "aws bedrock list-foundation-models"*) return 0 ;;
         *) return 1 ;;
     esac
 }
 
-# Known-safe compound commands used by the setup wizard
-is_safe_compound_command() {
-    local cmd="$1"
-    case "$cmd" in
-        "which aws && aws --version"*) return 0 ;;
-        "which jq && jq --version"*) return 0 ;;
-        'which jq && jq --version 2>/dev/null || echo "NOT_INSTALLED"') return 0 ;;
-        'which aws && aws --version 2>/dev/null || echo "NOT_INSTALLED"') return 0 ;;
-        *) return 1 ;;
-    esac
-}
-
-# Auto-approve if: safe compound command OR (allowed command AND no dangerous patterns)
-if is_safe_compound_command "$COMMAND" || \
-   { is_allowed_command "$COMMAND" && ! has_dangerous_patterns "$COMMAND"; }; then
-    cat << 'EOF'
-{
-  "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "permissionDecision": "allow",
-    "permissionDecisionReason": "Bedrock plugin read-only command"
-  }
-}
-EOF
-    exit 0
+# 1. Always approve our plugin scripts (they're trusted code)
+if is_plugin_script "$COMMAND"; then
+    approve
 fi
 
-# Commands requiring user approval (not auto-approved):
+# 2. Approve safe AWS commands (no dangerous patterns)
+if is_allowed_aws_command "$COMMAND" && ! has_dangerous_patterns "$COMMAND"; then
+    approve
+fi
+
+# For any other command, don't make a decision (let normal flow proceed)
+# This includes:
 # - aws configure sso (modifies config)
 # - aws sso login (opens browser)
 # - brew install (installs software)
-
-# For any other command, don't make a decision (let normal flow proceed)
 echo '{}'
 exit 0

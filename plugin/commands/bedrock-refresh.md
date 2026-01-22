@@ -6,31 +6,34 @@ description: Re-authenticate your AWS Bedrock SSO session
 
 Re-authenticate the AWS SSO session.
 
-## Behavior
+## Check Current Config
 
-1. Read `~/.claude/settings.json`
-2. Confirm with user
-3. Run SSO login
-4. Report result
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/dist/index.js test-bedrock
+```
 
-## Not Configured
-
+**If `configured: false`:**
 ```
 Bedrock not configured
 
 To set up AWS Bedrock: /bedrock
 ```
 
-## Refresh Flow
+## Confirm with User
 
 Use `AskUserQuestion`:
 - "Re-authenticate AWS Bedrock? This will open your browser."
 - Options: "Yes, open browser" / "Cancel"
 
-If yes:
+## Run SSO Login
+
+Get the profile from the test-bedrock response, then run:
+
 ```bash
-aws sso login --profile <AWS_PROFILE>
+aws sso login --profile <profile>
 ```
+
+**Note:** This command opens a browser and requires user interaction. It cannot be auto-approved.
 
 **Output:**
 ```
@@ -40,58 +43,33 @@ Profile: <profile>
 Opening browser for SSO login...
 ```
 
-After success:
+## Verify Success
+
+After login completes, run test-bedrock again to verify:
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/dist/index.js test-bedrock
+```
+
+**If `allPassed: true`:**
 ```
 ✓ Authentication successful
 
 Your SSO session is now active.
-Run /bedrock:status to verify.
+```
+
+**If `credentials.passed: false`:**
+```
+✗ Authentication may not have completed
+
+Try running /bedrock:refresh again or check /bedrock:diagnose
 ```
 
 ## Error Handling
 
-**Profile not found:**
-```
-✗ Profile "<profile>" not found
-
-Available profiles: <list from aws configure list-profiles>
-
-To fix: /bedrock to reconfigure
-```
-
-**SSO login cancelled:**
-```
-✗ SSO login cancelled or timed out
-
-The browser authentication did not complete.
-
-To fix: /bedrock:refresh
-```
-
-**Network timeout:**
-```
-✗ Network error during authentication
-
-Check your internet connection, VPN, or corporate firewall.
-
-To fix: /bedrock:refresh
-```
-
-**SSO portal unreachable:**
-```
-✗ Could not reach SSO portal
-
-Verify your SSO start URL is correct.
-Current profile: <profile>
-
-To fix: /bedrock to reconfigure
-```
-
-**Unknown failure:**
-```
-✗ Authentication failed
-
-Error: <error message from CLI>
-
-To fix: /bedrock:diagnose for detailed troubleshooting
-```
+| Error | Fix |
+|-------|-----|
+| Profile not found | Run `/bedrock` to reconfigure |
+| SSO login cancelled | Run `/bedrock:refresh` again |
+| Network error | Check internet/VPN connection |
+| SSO portal unreachable | Verify SSO URL, run `/bedrock` to reconfigure |

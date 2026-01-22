@@ -6,93 +6,97 @@ description: Run diagnostics to identify AWS Bedrock configuration or authentica
 
 Run comprehensive diagnostics on the AWS Bedrock configuration.
 
-## Behavior
+## Run Diagnostics
 
-1. Read `~/.claude/settings.json`
-2. Run checks in order, stop at first critical failure
-3. Show clear fix for any issue found
+Run both checks:
 
-## Not Configured
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/dist/index.js check-prerequisites
+```
 
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/dist/index.js test-bedrock
+```
+
+## Interpret Results
+
+### Prerequisites Check
+
+```json
+{
+  "success": true,
+  "data": {
+    "ready": true,
+    "missing": []
+  }
+}
+```
+
+- `ready: false` → Show missing tools, suggest `brew install`
+
+### Bedrock Check
+
+```json
+{
+  "success": true,
+  "data": {
+    "configured": true,
+    "allPassed": true,
+    "checks": {
+      "credentials": { "passed": true, "message": "..." },
+      "bedrockAccess": { "passed": true, "message": "..." },
+      "modelAvailable": { "passed": true, "message": "..." }
+    }
+  }
+}
+```
+
+## Display Output
+
+**If not configured:**
 ```
 Bedrock not configured
 
 To set up AWS Bedrock: /bedrock
 ```
 
-## Diagnostic Checks
-
-Run these checks in order:
-
-### Check 1: AWS CLI
-
-```bash
-which aws && aws --version
-```
-
-- ✓ Installed → continue
-- ✗ Not installed → "AWS CLI not found. Run /bedrock to install."
-
-### Check 2: Profile Exists
-
-```bash
-aws configure list-profiles | grep -w "<AWS_PROFILE>"
-```
-
-- ✓ Found → continue
-- ✗ Not found → "Profile not found. Run /bedrock to reconfigure."
-
-### Check 3: SSO Session
-
-```bash
-aws sts get-caller-identity --profile <AWS_PROFILE> 2>&1
-```
-
-- ✓ Returns identity → session valid
-- ✗ Fails → "Session expired. Run: aws sso login --profile <profile>"
-
-### Check 4: Configuration
-
-Check settings.json has:
-- `CLAUDE_CODE_USE_BEDROCK`: `"1"`
-- `AWS_PROFILE`: set
-- `AWS_REGION`: set
-- `ANTHROPIC_MODEL`: set
-
-## Output (All Pass)
-
+**If all pass:**
 ```
 Running Bedrock diagnostics...
 
 System
   ✓ AWS CLI installed
-  ✓ Profile exists (<profile>)
+  ✓ Node installed
 
 Authentication
-  ✓ SSO session valid
+  ✓ Credentials valid
 
-Configuration
-  ✓ Bedrock enabled
-  ✓ Profile configured
-  ✓ Region configured
-  ✓ Model configured
+Access
+  ✓ Bedrock access confirmed
+  ✓ Model available
 
 ✓ All checks passed
 ```
 
-## Output (Issue Found)
-
+**If issues found:**
 ```
 Running Bedrock diagnostics...
 
 System
   ✓ AWS CLI installed
-  ✓ Profile exists (<profile>)
+  ✓ Node installed
 
 Authentication
-  ✗ SSO session expired
+  ✗ <credentials.message>
 
-To fix: aws sso login --profile <profile>
-
-Or: /bedrock:refresh
+To fix: /bedrock:refresh
 ```
+
+## Fixes by Issue
+
+| Check Failed | Fix |
+|--------------|-----|
+| `ready: false` | Install missing tools |
+| `credentials.passed: false` | Run `/bedrock:refresh` or `aws sso login --profile <profile>` |
+| `bedrockAccess.passed: false` | Check IAM permissions, verify Bedrock is enabled in region |
+| `modelAvailable.passed: false` | Model changed or removed, run `/bedrock` to reconfigure |
