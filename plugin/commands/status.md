@@ -28,10 +28,7 @@ Run /bedrock:manage to set up AWS Bedrock.
 
 **If configured:**
 
-Also get session expiration:
-```bash
-aws configure export-credentials --profile <profile> --format process 2>/dev/null | jq -r '.Expiration // "unknown"'
-```
+Run get-aws-context which returns `sessionExpiresLocal` (formatted in local time with timezone).
 
 Display:
 ```
@@ -42,7 +39,7 @@ Bedrock Status
   Region:   <region>
   Model:    <model>
   Auth:     <✓ valid | ✗ expired>
-  Expires:  <expiration time or "~Xh remaining">
+  Expires:  <sessionExpiresLocal> (e.g., "2026-01-22 04:55 MST")
 
 System
   [OK] AWS CLI installed (<version>)

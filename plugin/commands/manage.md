@@ -37,10 +37,7 @@ Options:
 
 **If configured (`configured: true`):**
 
-To get session expiration, also run:
-```bash
-aws configure export-credentials --profile <profile> --format process 2>/dev/null | jq -r '.Expiration // "unknown"'
-```
+To get session expiration, run get-aws-context which returns `sessionExpiresLocal` (formatted in local time with timezone).
 
 Display with expiration info:
 ```
@@ -51,7 +48,7 @@ AWS Bedrock
   Region:   <region>
   Model:    <model>
   Auth:     <✓ valid | ✗ expired>
-  Expires:  <expiration time or "~Xh remaining">
+  Expires:  <sessionExpiresLocal> (e.g., "2026-01-22 04:55 MST")
 
 Tip: Use /model to quickly switch between available models
 
@@ -117,8 +114,9 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/dist/index.js get-aws-context --check-bedrock
 ```
 
 **If `bedrockAccess: true`:**
-- Show available `inferenceProfiles`
+- Show available `inferenceProfiles` (already filtered to prefer `global.` prefix)
 - Use `AskUserQuestion` to select model
+- Note: The script automatically prefers `global.` profiles for best availability
 
 **If `bedrockAccess: false`:**
 - May need SSO login: `aws sso login --profile <profile>`

@@ -13,7 +13,14 @@ export interface AwsCredentials {
     secretAccessKey: string;
     sessionToken?: string;
     expiration?: string;
+    expirationLocal?: string;
 }
+/**
+ * Format an ISO8601 UTC timestamp to local time with timezone indicator
+ * Uses system locale and timezone settings - nothing is hardcoded
+ * Example: "2026-01-22T11:55:13+00:00" -> "2026-01-22 04:55 MST"
+ */
+export declare function formatExpirationLocal(isoTimestamp: string | undefined | null): string | null;
 export interface InferenceProfile {
     profileId: string;
     profileName: string;

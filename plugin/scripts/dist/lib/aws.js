@@ -2,6 +2,34 @@
 import { awsCli, awsCliInteractive } from './shell.js';
 import { AWS_CRED_KEYS } from './constants.js';
 /**
+ * Format an ISO8601 UTC timestamp to local time with timezone indicator
+ * Uses system locale and timezone settings - nothing is hardcoded
+ * Example: "2026-01-22T11:55:13+00:00" -> "2026-01-22 04:55 MST"
+ */
+export function formatExpirationLocal(isoTimestamp) {
+    if (!isoTimestamp)
+        return null;
+    try {
+        const date = new Date(isoTimestamp);
+        if (isNaN(date.getTime()))
+            return null;
+        // Get timezone abbreviation using system locale (undefined = system default)
+        const tzAbbrev = date.toLocaleTimeString(undefined, { timeZoneName: 'short' })
+            .split(' ')
+            .pop() || '';
+        // Format: YYYY-MM-DD HH:MM TZ (using local time from Date object)
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes} ${tzAbbrev}`;
+    }
+    catch {
+        return null;
+    }
+}
+/**
  * List all configured AWS profiles
  */
 export function listProfiles() {
@@ -51,8 +79,10 @@ export function exportCredentials(profile) {
             creds.secretAccessKey = value;
         if (key === AWS_CRED_KEYS.SESSION_TOKEN)
             creds.sessionToken = value;
-        if (key === AWS_CRED_KEYS.EXPIRATION)
+        if (key === AWS_CRED_KEYS.EXPIRATION) {
             creds.expiration = value;
+            creds.expirationLocal = formatExpirationLocal(value) || undefined;
+        }
     }
     if (creds.accessKeyId && creds.secretAccessKey) {
         return creds;

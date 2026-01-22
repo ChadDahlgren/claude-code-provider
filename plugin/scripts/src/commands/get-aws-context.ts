@@ -20,7 +20,8 @@ interface ProfileInfo {
   region: string | null;
   valid: boolean;
   identity: AwsIdentity | null;
-  sessionExpires: string | null;
+  sessionExpires: string | null;       // Raw UTC timestamp
+  sessionExpiresLocal: string | null;  // Formatted in local time with timezone
   bedrockAccess: boolean;
   inferenceProfiles: InferenceProfile[];
 }
@@ -48,6 +49,40 @@ function filterClaudeModels(profiles: InferenceProfile[]): InferenceProfile[] {
     p.profileId.includes('anthropic') ||
     p.profileName.toLowerCase().includes('claude')
   );
+}
+
+/**
+ * Prefer global. profiles over regional ones (us., eu., ap.)
+ * If a model exists with global. prefix, exclude the regional versions
+ * Sort so global. profiles appear first
+ */
+function preferGlobalProfiles(profiles: InferenceProfile[]): InferenceProfile[] {
+  // Extract the model name without the region prefix
+  // e.g., "global.anthropic.claude-opus-4-5-20251101-v1:0" -> "anthropic.claude-opus-4-5-20251101-v1:0"
+  const getModelBase = (profileId: string): string => {
+    return profileId.replace(/^(global|us|eu|ap)\./, '');
+  };
+
+  // Find which models have global. versions available
+  const globalModels = new Set(
+    profiles
+      .filter(p => p.profileId.startsWith('global.'))
+      .map(p => getModelBase(p.profileId))
+  );
+
+  // Filter out regional profiles if global version exists
+  const filtered = profiles.filter(p => {
+    const base = getModelBase(p.profileId);
+    // Keep if it's global, or if there's no global version available
+    return p.profileId.startsWith('global.') || !globalModels.has(base);
+  });
+
+  // Sort so global. profiles appear first
+  return filtered.sort((a, b) => {
+    const aIsGlobal = a.profileId.startsWith('global.') ? 0 : 1;
+    const bIsGlobal = b.profileId.startsWith('global.') ? 0 : 1;
+    return aIsGlobal - bIsGlobal;
+  });
 }
 
 export function getAwsContext(): void {
@@ -89,6 +124,7 @@ export function getAwsContext(): void {
       valid: identity !== null,
       identity,
       sessionExpires: creds?.expiration || null,
+      sessionExpiresLocal: creds?.expirationLocal || null,
       bedrockAccess: false,
       inferenceProfiles: []
     };
@@ -102,10 +138,11 @@ export function getAwsContext(): void {
       for (const r of regionsToCheck) {
         const allProfiles = listInferenceProfiles(name, r);
         const claudeProfiles = filterClaudeModels(allProfiles);
+        const preferredProfiles = preferGlobalProfiles(claudeProfiles);
 
-        if (claudeProfiles.length > 0) {
+        if (preferredProfiles.length > 0) {
           info.bedrockAccess = true;
-          info.inferenceProfiles = claudeProfiles;
+          info.inferenceProfiles = preferredProfiles;
           if (!info.region) {
             info.region = r; // Set region if we found Bedrock access
           }

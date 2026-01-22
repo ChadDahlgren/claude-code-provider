@@ -12,6 +12,34 @@ function filterClaudeModels(profiles) {
     return profiles.filter(p => p.profileId.includes('anthropic') ||
         p.profileName.toLowerCase().includes('claude'));
 }
+/**
+ * Prefer global. profiles over regional ones (us., eu., ap.)
+ * If a model exists with global. prefix, exclude the regional versions
+ * Sort so global. profiles appear first
+ */
+function preferGlobalProfiles(profiles) {
+    // Extract the model name without the region prefix
+    // e.g., "global.anthropic.claude-opus-4-5-20251101-v1:0" -> "anthropic.claude-opus-4-5-20251101-v1:0"
+    const getModelBase = (profileId) => {
+        return profileId.replace(/^(global|us|eu|ap)\./, '');
+    };
+    // Find which models have global. versions available
+    const globalModels = new Set(profiles
+        .filter(p => p.profileId.startsWith('global.'))
+        .map(p => getModelBase(p.profileId)));
+    // Filter out regional profiles if global version exists
+    const filtered = profiles.filter(p => {
+        const base = getModelBase(p.profileId);
+        // Keep if it's global, or if there's no global version available
+        return p.profileId.startsWith('global.') || !globalModels.has(base);
+    });
+    // Sort so global. profiles appear first
+    return filtered.sort((a, b) => {
+        const aIsGlobal = a.profileId.startsWith('global.') ? 0 : 1;
+        const bIsGlobal = b.profileId.startsWith('global.') ? 0 : 1;
+        return aIsGlobal - bIsGlobal;
+    });
+}
 export function getAwsContext() {
     const args = parseArgs();
     const checkBedrockFlag = hasFlag(args, 'check-bedrock');
@@ -45,6 +73,7 @@ export function getAwsContext() {
             valid: identity !== null,
             identity,
             sessionExpires: creds?.expiration || null,
+            sessionExpiresLocal: creds?.expirationLocal || null,
             bedrockAccess: false,
             inferenceProfiles: []
         };
@@ -56,9 +85,10 @@ export function getAwsContext() {
             for (const r of regionsToCheck) {
                 const allProfiles = listInferenceProfiles(name, r);
                 const claudeProfiles = filterClaudeModels(allProfiles);
-                if (claudeProfiles.length > 0) {
+                const preferredProfiles = preferGlobalProfiles(claudeProfiles);
+                if (preferredProfiles.length > 0) {
                     info.bedrockAccess = true;
-                    info.inferenceProfiles = claudeProfiles;
+                    info.inferenceProfiles = preferredProfiles;
                     if (!info.region) {
                         info.region = r; // Set region if we found Bedrock access
                     }
