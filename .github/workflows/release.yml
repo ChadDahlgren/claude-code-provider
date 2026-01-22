@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: plugin/scripts
+        run: npm ci
+
+      - name: Build TypeScript
+        working-directory: plugin/scripts
+        run: npm run build
+
+      - name: Run tests
+        working-directory: plugin/scripts
+        run: npm test
+
+      - name: Create release artifact
+        run: |
+          # Create a clean release directory
+          mkdir -p release/plugin
+
+          # Copy plugin manifest and hooks
+          cp -r plugin/.claude-plugin release/plugin/
+
+          # Copy commands
+          cp -r plugin/commands release/plugin/
+
+          # Copy skills
+          cp -r plugin/skills release/plugin/
+
+          # Copy compiled scripts (dist only, no source)
+          mkdir -p release/plugin/scripts
+          cp -r plugin/scripts/dist release/plugin/scripts/
+          cp plugin/scripts/package.json release/plugin/scripts/
+
+          # Install production dependencies only
+          cd release/plugin/scripts
+          npm ci --omit=dev
+          cd ../../..
+
+          # Copy marketplace config
+          cp -r .claude-plugin release/
+
+          # Copy README
+          cp README.md release/
+
+          # Create tarball
+          cd release
+          tar -czvf ../claude-code-bedrock-${{ github.ref_name }}.tar.gz .
+          cd ..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: claude-code-bedrock-${{ github.ref_name }}.tar.gz
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
