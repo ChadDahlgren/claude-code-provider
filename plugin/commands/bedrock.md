@@ -79,6 +79,27 @@ Complete browser auth, then return here.
 **If `validProfiles` has multiple options and user wants to select:**
 - Show list with `AskUserQuestion`
 
+**If user selects "Configure new profile":**
+- Collect SSO info via `AskUserQuestion` (all in one prompt if possible):
+  - SSO start URL (e.g., `https://company.awsapps.com/start`)
+  - SSO region (e.g., `us-west-2`)
+  - Profile name (e.g., `work-dev`)
+- Tell user to run in their terminal:
+
+```
+Run: aws configure sso
+
+Enter these values when prompted:
+  SSO session name:        {profile_name}
+  SSO start URL:           {sso_url}
+  SSO region:              {sso_region}
+  SSO registration scopes: sso:account:access   ← IMPORTANT for 90-day sessions!
+
+Complete browser auth, then return here.
+```
+
+- After user confirms, re-run `get-aws-context` to verify the new profile
+
 ## Step 3: Check Bedrock Access
 
 Once profile is selected, check Bedrock access:
