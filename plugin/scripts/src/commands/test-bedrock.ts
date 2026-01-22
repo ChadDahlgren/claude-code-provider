@@ -3,13 +3,15 @@
 import { execSync } from 'child_process';
 import { success, failure } from '../lib/output.js';
 import { getBedrockConfig } from '../lib/config.js';
-import { getCallerIdentity, listInferenceProfiles } from '../lib/aws.js';
+import { getCallerIdentity, listInferenceProfiles, exportCredentials } from '../lib/aws.js';
 
 interface TestResult {
   configured: boolean;
   profile: string | null;
   region: string | null;
   model: string | null;
+  sessionExpires: string | null;       // Raw UTC timestamp
+  sessionExpiresLocal: string | null;  // Formatted in local time with timezone
   checks: {
     credentials: { passed: boolean; message: string };
     bedrockAccess: { passed: boolean; message: string };
@@ -27,6 +29,8 @@ export function testBedrock(): void {
       profile: null,
       region: null,
       model: null,
+      sessionExpires: null,
+      sessionExpiresLocal: null,
       checks: {
         credentials: { passed: false, message: 'Bedrock not configured' },
         bedrockAccess: { passed: false, message: 'Bedrock not configured' },
@@ -44,6 +48,10 @@ export function testBedrock(): void {
     modelAvailable: { passed: false, message: '' }
   };
 
+  // Session expiration info
+  let sessionExpires: string | null = null;
+  let sessionExpiresLocal: string | null = null;
+
   // Check 1: Credentials are valid
   if (profile) {
     const identityResult = getCallerIdentity(profile);
@@ -52,6 +60,12 @@ export function testBedrock(): void {
         passed: true,
         message: `Authenticated as ${identityResult.identity.arn}`
       };
+      // Get session expiration
+      const creds = exportCredentials(profile);
+      if (creds) {
+        sessionExpires = creds.expiration || null;
+        sessionExpiresLocal = creds.expirationLocal || null;
+      }
     } else {
       // Use error context for better message
       const errorMsg = identityResult.error?.suggestion || `Run: aws sso login --profile ${profile}`;
@@ -129,6 +143,8 @@ export function testBedrock(): void {
     profile: profile || null,
     region: region || null,
     model: model || null,
+    sessionExpires,
+    sessionExpiresLocal,
     checks,
     allPassed
   });

@@ -1,7 +1,7 @@
 // Test Bedrock connection - verify API access works
 import { success } from '../lib/output.js';
 import { getBedrockConfig } from '../lib/config.js';
-import { getCallerIdentity, listInferenceProfiles } from '../lib/aws.js';
+import { getCallerIdentity, listInferenceProfiles, exportCredentials } from '../lib/aws.js';
 export function testBedrock() {
     const config = getBedrockConfig();
     if (!config) {
@@ -10,6 +10,8 @@ export function testBedrock() {
             profile: null,
             region: null,
             model: null,
+            sessionExpires: null,
+            sessionExpiresLocal: null,
             checks: {
                 credentials: { passed: false, message: 'Bedrock not configured' },
                 bedrockAccess: { passed: false, message: 'Bedrock not configured' },
@@ -25,6 +27,9 @@ export function testBedrock() {
         bedrockAccess: { passed: false, message: '' },
         modelAvailable: { passed: false, message: '' }
     };
+    // Session expiration info
+    let sessionExpires = null;
+    let sessionExpiresLocal = null;
     // Check 1: Credentials are valid
     if (profile) {
         const identityResult = getCallerIdentity(profile);
@@ -33,6 +38,12 @@ export function testBedrock() {
                 passed: true,
                 message: `Authenticated as ${identityResult.identity.arn}`
             };
+            // Get session expiration
+            const creds = exportCredentials(profile);
+            if (creds) {
+                sessionExpires = creds.expiration || null;
+                sessionExpiresLocal = creds.expirationLocal || null;
+            }
         }
         else {
             // Use error context for better message
@@ -110,6 +121,8 @@ export function testBedrock() {
         profile: profile || null,
         region: region || null,
         model: model || null,
+        sessionExpires,
+        sessionExpiresLocal,
         checks,
         allPassed
     });

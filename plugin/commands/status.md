@@ -28,7 +28,7 @@ Run /bedrock:manage to set up AWS Bedrock.
 
 **If configured:**
 
-Run get-aws-context which returns `sessionExpiresLocal` (formatted in local time with timezone).
+The `test-bedrock` command returns `sessionExpiresLocal` (formatted in local time with timezone).
 
 Display:
 ```
