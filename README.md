@@ -9,7 +9,8 @@ This plugin simplifies configuring Claude Code to use AWS Bedrock through an int
 ### Features
 
 - **Guided Setup Wizard** — Step-by-step configuration via `/bedrock` command
-- **Automatic Dependency Check** — Verifies AWS CLI and jq are installed
+- **Automatic Session Management** — Detects expired SSO sessions and prompts re-authentication
+- **Automatic Credential Refresh** — Claude Code auto-refreshes credentials when they expire
 - **Profile Detection** — Discovers existing AWS SSO profiles
 - **Smart Defaults** — Recommends optimal regions and inference profiles
 - **Diagnostics** — Troubleshoots issues with clear fix instructions
@@ -43,7 +44,10 @@ claude-code-bedrock/
 ├── plugin/                 # The distributable plugin
 │   ├── commands/           # Slash commands (/bedrock, etc.)
 │   ├── skills/             # Reference documentation for AI
-│   └── .claude-plugin/     # Plugin manifest and hooks
+│   └── .claude-plugin/
+│       ├── plugin.json     # Plugin manifest
+│       └── hooks/          # Session and tool hooks
+├── dev/                    # Development tooling
 ├── README.md
 └── LICENSE
 ```
@@ -68,7 +72,7 @@ Settings are stored in `~/.claude/settings.json`:
     "AWS_REGION": "us-west-2",
     "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-5-20251101-v1:0"
   },
-  "bedrockAuthRefresh": "aws sso login --profile your-profile"
+  "awsAuthRefresh": "aws sso login --profile your-profile"
 }
 ```
 

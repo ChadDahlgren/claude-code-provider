@@ -54,9 +54,19 @@ Settings are stored in `~/.claude/settings.json`:
     "AWS_REGION": "us-west-2",
     "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-5-20251101-v1:0"
   },
-  "bedrockAuthRefresh": "aws sso login --profile your-profile"
+  "awsAuthRefresh": "aws sso login --profile your-profile"
 }
 ```
+
+## Automatic Session Management
+
+This plugin includes two mechanisms to handle SSO session expiration:
+
+1. **Proactive Check (SessionStart hook)**: When Claude Code starts, the plugin checks your SSO session status. If expired or expiring soon, you'll see a warning with instructions to re-authenticate.
+
+2. **Automatic Refresh (awsAuthRefresh)**: When configured, Claude Code automatically runs `aws sso login` when it detects expired credentials, then retries the request.
+
+This prevents the "chicken-and-egg" problem where expired credentials would prevent Claude from helping you troubleshoot.
 
 ## Troubleshooting
 

@@ -30,7 +30,7 @@ If confirmed, remove these keys from `~/.claude/settings.json`:
 - `ANTHROPIC_MODEL`
 
 **From root:**
-- `bedrockAuthRefresh`
+- `awsAuthRefresh`
 
 **Important:** Preserve all other settings (MCP servers, hooks, etc.)
 

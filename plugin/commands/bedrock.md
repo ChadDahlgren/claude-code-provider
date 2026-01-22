@@ -112,7 +112,7 @@ Merge into `~/.claude/settings.json` (preserve existing settings):
     "AWS_REGION": "<region>",
     "ANTHROPIC_MODEL": "<model-id>"
   },
-  "bedrockAuthRefresh": "aws sso login --profile <profile>"
+  "awsAuthRefresh": "aws sso login --profile <profile>"
 }
 ```
 

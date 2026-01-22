@@ -51,7 +51,7 @@ if [ -f ~/.claude/settings.json ]; then
         echo "   ✓ Backed up to: $SETTINGS_BACKUP"
 
         # Remove Bedrock-related keys from env
-        jq 'del(.env.CLAUDE_CODE_USE_BEDROCK, .env.AWS_PROFILE, .env.AWS_REGION, .env.ANTHROPIC_MODEL) | del(.bedrockAuthRefresh)' \
+        jq 'del(.env.CLAUDE_CODE_USE_BEDROCK, .env.AWS_PROFILE, .env.AWS_REGION, .env.ANTHROPIC_MODEL) | del(.awsAuthRefresh)' \
             ~/.claude/settings.json > ~/.claude/settings.json.tmp \
             && mv ~/.claude/settings.json.tmp ~/.claude/settings.json
 
@@ -60,7 +60,7 @@ if [ -f ~/.claude/settings.json ]; then
         echo "     - AWS_PROFILE"
         echo "     - AWS_REGION"
         echo "     - ANTHROPIC_MODEL"
-        echo "     - bedrockAuthRefresh"
+        echo "     - awsAuthRefresh"
     fi
 else
     echo "   - No settings file found"
