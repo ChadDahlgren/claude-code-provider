@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/check-sso-session.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/.claude-plugin/hooks/check-sso-session.sh",
             "timeout": 5000
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/approve-plugin-scripts.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/.claude-plugin/hooks/approve-plugin-scripts.sh",
             "timeout": 5000
           }
         ]
