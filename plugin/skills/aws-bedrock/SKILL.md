@@ -117,13 +117,13 @@ Prompts for:
 
 ### Checking Your Configuration
 
-Check if your profile uses SSO Session format:
+Check if your profile uses SSO Session format (with refresh tokens):
 ```bash
-grep -A5 "\[profile" ~/.aws/config | grep -E "(sso_session|sso_start_url)"
+aws configure get sso_session --profile <profile-name> 2>/dev/null && echo "Has refresh tokens" || echo "Legacy format"
 ```
 
-- If you see `sso_session = ...`: You have refresh tokens (good)
-- If you see `sso_start_url = ...` directly under profile: Legacy format (8-hour sessions)
+- If it outputs a session name: You have refresh tokens (good)
+- If it outputs nothing/error: Legacy format (8-hour sessions)
 
 ### SSO Login
 ```bash

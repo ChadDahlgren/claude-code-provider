@@ -82,14 +82,22 @@ check_session_via_cli() {
     fi
 
     # Calculate minutes until expiration
+    # AWS returns ISO8601 like: 2024-01-15T14:30:45.123Z or 2024-01-15T14:30:45+00:00
     local expires_epoch now_epoch diff_seconds diff_minutes
+    local clean_date
+
+    # Strip fractional seconds (.123) and normalize timezone
+    # Convert "2024-01-15T14:30:45.123Z" -> "2024-01-15T14:30:45"
+    clean_date="${expiration%%.*}"  # Strip .123Z or .123+00:00
+    clean_date="${clean_date%%Z}"   # Strip trailing Z if no fractional
+    clean_date="${clean_date%%+*}"  # Strip +00:00 timezone
 
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS: Convert ISO8601 to epoch
-        expires_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${expiration%%[+-]*}" "+%s" 2>/dev/null || echo "0")
+        # macOS: Parse as UTC (-u flag) since AWS times are UTC
+        expires_epoch=$(date -u -j -f "%Y-%m-%dT%H:%M:%S" "$clean_date" "+%s" 2>/dev/null || echo "0")
     else
-        # GNU date
-        expires_epoch=$(date -d "$expiration" "+%s" 2>/dev/null || echo "0")
+        # GNU date: Append Z to indicate UTC
+        expires_epoch=$(date -u -d "${clean_date}Z" "+%s" 2>/dev/null || echo "0")
     fi
 
     if [[ "$expires_epoch" == "0" ]]; then
@@ -97,7 +105,8 @@ check_session_via_cli() {
         return 0
     fi
 
-    now_epoch=$(date "+%s")
+    # Compare with current UTC time
+    now_epoch=$(date -u "+%s")
     diff_seconds=$((expires_epoch - now_epoch))
     diff_minutes=$((diff_seconds / 60))
 

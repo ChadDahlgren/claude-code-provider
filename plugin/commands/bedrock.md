@@ -75,7 +75,7 @@ Verify: `aws configure list-profiles | grep -w "{profile_name}"`
 If user selected an existing profile, check if it has refresh tokens:
 
 ```bash
-grep -A10 "\[profile {profile}\]" ~/.aws/config | grep -q "sso_session" && echo "has_refresh_tokens" || echo "legacy_format"
+aws configure get sso_session --profile {profile} 2>/dev/null && echo "has_refresh_tokens" || echo "legacy_format"
 ```
 
 **Legacy format detected?** Use `AskUserQuestion`:
