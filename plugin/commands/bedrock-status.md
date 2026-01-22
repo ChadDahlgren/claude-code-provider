@@ -76,3 +76,16 @@ Then show each check that has `passed: false` with its `message`.
 - `credentials.passed: false` → Run `/bedrock:refresh`
 - `bedrockAccess.passed: false` → Check IAM permissions
 - `modelAvailable.passed: false` → Model may have been removed, run `/bedrock` to reconfigure
+
+**Always include manual recovery note when issues detected:**
+```
+────────────────────────────────────────────
+Manual Recovery (if Claude becomes unresponsive)
+
+If you can't use Claude commands due to API errors:
+1. Edit ~/.claude/settings.json
+2. Delete these keys from "env":
+   CLAUDE_CODE_USE_BEDROCK, AWS_PROFILE, AWS_REGION, ANTHROPIC_MODEL
+3. Delete "awsAuthRefresh" and "model" (if present)
+4. Restart Claude Code
+```

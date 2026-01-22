@@ -154,6 +154,18 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/dist/index.js apply-config --profile=<profile
 
 To check status: /bedrock:status
 To undo: /bedrock:reset
+
+────────────────────────────────────────────
+Manual Recovery (if Claude becomes unresponsive)
+
+If Bedrock is misconfigured and Claude can't make API calls,
+you won't be able to use /bedrock:reset. To manually fix:
+
+1. Edit ~/.claude/settings.json
+2. Delete these keys from "env":
+   CLAUDE_CODE_USE_BEDROCK, AWS_PROFILE, AWS_REGION, ANTHROPIC_MODEL
+3. Delete "awsAuthRefresh" and "model" (if present)
+4. Restart Claude Code
 ```
 
 ## Error Handling
