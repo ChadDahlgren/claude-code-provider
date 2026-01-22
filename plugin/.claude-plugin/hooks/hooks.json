@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '✓ Bedrock plugin installed! Run /bedrock:manage to configure AWS SSO.'",
+            "command": "echo '✓ Bedrock plugin installed! Run /bedrock:manage to configure.'",
             "timeout": 5000
           }
         ]
