@@ -64,6 +64,15 @@ export function applyBedrockConfig(config) {
     });
 }
 /**
+ * Check if a model ID is a Bedrock model (has provider prefix and version suffix)
+ */
+function isBedrockModel(modelId) {
+    if (!modelId)
+        return false;
+    // Bedrock models have format like: us.anthropic.claude-xxx:0 or global.anthropic.claude-xxx:0
+    return /^(us|eu|ap|global)\.anthropic\./.test(modelId) && modelId.includes(':');
+}
+/**
  * Remove Bedrock configuration from settings
  */
 export function removeBedrockConfig() {
@@ -75,13 +84,22 @@ export function removeBedrockConfig() {
     delete env.ANTHROPIC_MODEL;
     const updated = { ...settings };
     delete updated.awsAuthRefresh;
+    // Also remove root-level model if it's a Bedrock model
+    if (isBedrockModel(updated.model)) {
+        delete updated.model;
+    }
     if (Object.keys(env).length > 0) {
         updated.env = env;
     }
     else {
         delete updated.env;
     }
-    writeSettings(updated);
+    // Write directly to file (bypass merge in writeSettings since we're removing keys)
+    const dir = dirname(SETTINGS_PATH);
+    if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true });
+    }
+    writeFileSync(SETTINGS_PATH, JSON.stringify(updated, null, 2) + '\n');
 }
 /**
  * Check if Bedrock is configured

@@ -6,6 +6,7 @@ export interface BedrockConfig {
 export interface ClaudeSettings {
     env?: Record<string, string>;
     awsAuthRefresh?: string;
+    model?: string;
     [key: string]: unknown;
 }
 /**
