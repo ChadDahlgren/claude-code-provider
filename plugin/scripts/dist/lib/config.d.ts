@@ -52,6 +52,7 @@ export declare function writeSettings(updates: Partial<ClaudeSettings>): void;
 export declare function getBedrockConfig(): BedrockConfig | null;
 /**
  * Apply Bedrock configuration to settings
+ * Also applies balanced inference defaults on initial setup
  */
 export declare function applyBedrockConfig(config: {
     profile: string;

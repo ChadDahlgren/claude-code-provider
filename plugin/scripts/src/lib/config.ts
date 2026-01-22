@@ -191,6 +191,7 @@ export function getBedrockConfig(): BedrockConfig | null {
 
 /**
  * Apply Bedrock configuration to settings
+ * Also applies balanced inference defaults on initial setup
  */
 export function applyBedrockConfig(config: {
   profile: string;
@@ -198,15 +199,23 @@ export function applyBedrockConfig(config: {
   model: string;
 }): void {
   const settings = readSettings();
+  const existingEnv = settings.env || {};
+
+  // Get balanced preset defaults for inference settings
+  const balancedPreset = INFERENCE_PRESETS[DEFAULT_INFERENCE_PRESET];
 
   writeSettings({
     ...settings,
     env: {
-      ...(settings.env || {}),
+      ...existingEnv,
       [ENV_KEYS.USE_BEDROCK]: ENV_VALUES.BEDROCK_ENABLED,
       [ENV_KEYS.AWS_PROFILE]: config.profile,
       [ENV_KEYS.AWS_REGION]: config.region,
-      [ENV_KEYS.ANTHROPIC_MODEL]: config.model
+      [ENV_KEYS.ANTHROPIC_MODEL]: config.model,
+      // Apply balanced inference defaults (user can change via Thinking Mode later)
+      [ENV_KEYS.MAX_THINKING_TOKENS]: existingEnv[ENV_KEYS.MAX_THINKING_TOKENS] || balancedPreset.thinkingTokens.toString(),
+      [ENV_KEYS.MAX_OUTPUT_TOKENS]: existingEnv[ENV_KEYS.MAX_OUTPUT_TOKENS] || balancedPreset.outputTokens.toString(),
+      [ENV_KEYS.DISABLE_PROMPT_CACHING]: existingEnv[ENV_KEYS.DISABLE_PROMPT_CACHING] || '0',
     },
     awsAuthRefresh: `aws sso login --profile ${config.profile}`
   });
