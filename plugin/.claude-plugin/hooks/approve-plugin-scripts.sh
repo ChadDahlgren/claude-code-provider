@@ -15,16 +15,19 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null || echo 
 # Check for shell operators that chain commands
 has_dangerous_patterns() {
     local cmd="$1"
+    # Strip safe stderr redirects before checking for dangerous patterns
+    local sanitized="${cmd//2>&1/}"
+    sanitized="${sanitized//2>\/dev\/null/}"
     # Reject: semicolon, &&, ||, pipe, subshell, backticks, redirection, newlines
-    if [[ "$cmd" == *';'* ]] || \
-       [[ "$cmd" == *'&&'* ]] || \
-       [[ "$cmd" == *'||'* ]] || \
-       [[ "$cmd" == *'|'* ]] || \
-       [[ "$cmd" == *'$('* ]] || \
-       [[ "$cmd" == *'`'* ]] || \
-       [[ "$cmd" == *'>'* ]] || \
-       [[ "$cmd" == *'<'* ]] || \
-       [[ "$cmd" == *$'\n'* ]]; then
+    if [[ "$sanitized" == *';'* ]] || \
+       [[ "$sanitized" == *'&&'* ]] || \
+       [[ "$sanitized" == *'||'* ]] || \
+       [[ "$sanitized" == *'|'* ]] || \
+       [[ "$sanitized" == *'$('* ]] || \
+       [[ "$sanitized" == *'`'* ]] || \
+       [[ "$sanitized" == *'>'* ]] || \
+       [[ "$sanitized" == *'<'* ]] || \
+       [[ "$sanitized" == *$'\n'* ]]; then
         return 0  # Has dangerous patterns
     fi
     return 1  # Safe
@@ -49,8 +52,21 @@ is_allowed_command() {
     esac
 }
 
-# Only auto-approve if: starts with allowed command AND has no dangerous patterns
-if is_allowed_command "$COMMAND" && ! has_dangerous_patterns "$COMMAND"; then
+# Known-safe compound commands used by the setup wizard
+is_safe_compound_command() {
+    local cmd="$1"
+    case "$cmd" in
+        "which aws && aws --version"*) return 0 ;;
+        "which jq && jq --version"*) return 0 ;;
+        'which jq && jq --version 2>/dev/null || echo "NOT_INSTALLED"') return 0 ;;
+        'which aws && aws --version 2>/dev/null || echo "NOT_INSTALLED"') return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# Auto-approve if: safe compound command OR (allowed command AND no dangerous patterns)
+if is_safe_compound_command "$COMMAND" || \
+   { is_allowed_command "$COMMAND" && ! has_dangerous_patterns "$COMMAND"; }; then
     cat << 'EOF'
 {
   "hookSpecificOutput": {
