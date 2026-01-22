@@ -18,6 +18,8 @@ if [[ "$COMMAND" == *'aws --version'* ]] || \
    [[ "$COMMAND" == *'jq --version'* ]] || \
    [[ "$COMMAND" == *'aws sts get-caller-identity'* ]] || \
    [[ "$COMMAND" == *'aws configure list-profiles'* ]] || \
+   [[ "$COMMAND" == *'aws configure get '* ]] || \
+   [[ "$COMMAND" == *'aws configure export-credentials'* ]] || \
    [[ "$COMMAND" == *'aws bedrock list-inference-profiles'* ]] || \
    [[ "$COMMAND" == *'aws bedrock list-foundation-models'* ]]; then
 
