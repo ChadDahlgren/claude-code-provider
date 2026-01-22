@@ -57,6 +57,8 @@ export interface SsoLoginResult {
 export declare function ssoLogin(profile: string): SsoLoginResult;
 /**
  * Get list of Bedrock regions to check, prioritized by user's profile region
+ * IMPORTANT: User's profile region is ALWAYS included first, even if not in known list
+ * This allows new AWS regions to work without code updates
  */
 export declare function getBedrockRegions(profileDefaultRegion?: string | null): string[];
 /**

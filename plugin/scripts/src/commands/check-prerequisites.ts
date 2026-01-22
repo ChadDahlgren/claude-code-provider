@@ -1,7 +1,7 @@
 // Check that required tools are installed
 
-import { execSync } from 'child_process';
-import { success, failure } from '../lib/output.js';
+import { execFileSync } from 'child_process';
+import { success } from '../lib/output.js';
 
 interface ToolStatus {
   installed: boolean;
@@ -15,9 +15,16 @@ interface PrerequisitesResult {
   missing: string[];
 }
 
+/**
+ * Check if a tool is installed by running it with --version
+ * Uses execFileSync (not execSync) to prevent command injection
+ */
 function checkTool(command: string, versionArg: string = '--version'): ToolStatus {
   try {
-    const output = execSync(`${command} ${versionArg} 2>&1`, { encoding: 'utf-8' }).trim();
+    const output = execFileSync(command, [versionArg], {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe']  // Capture stderr too
+    }).trim();
     // Extract just the version number from the first line
     const firstLine = output.split('\n')[0];
     return { installed: true, version: firstLine };

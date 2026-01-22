@@ -2,7 +2,7 @@
 description: Configure Claude's thinking mode
 ---
 
-# /bedrock:mode
+# /bedrock:thinking
 
 Configure how deeply Claude reasons before responding. These settings control REASONING time - how long Claude deliberates. This is NOT context window or how much of the codebase Claude can see.
 

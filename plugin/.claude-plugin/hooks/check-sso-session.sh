@@ -86,13 +86,21 @@ check_session_via_cli() {
     local expires_epoch now_epoch diff_seconds diff_minutes
     local clean_date
 
-    # Strip fractional seconds (.123) and normalize timezone
-    # Convert "2024-01-15T14:30:45.123Z" -> "2024-01-15T14:30:45"
-    # Handle formats: .123Z, .123+00:00, .123-08:00, Z, +00:00, -08:00
-    clean_date="${expiration%%.*}"  # Strip .123Z or .123+00:00 or .123-08:00
-    clean_date="${clean_date%%Z}"   # Strip trailing Z if no fractional
-    clean_date="${clean_date%%+*}"  # Strip +00:00 timezone
-    clean_date="${clean_date%%-[0-9][0-9]:*}"  # Strip -08:00 style timezone
+    # Extract just the YYYY-MM-DDTHH:MM:SS portion using regex-like extraction
+    # This is safer than trying to strip suffixes which could match date components
+    # Format: 2024-01-15T14:30:45 (first 19 characters of ISO8601)
+    if [[ ${#expiration} -ge 19 ]]; then
+        clean_date="${expiration:0:19}"
+    else
+        echo "valid:unknown"
+        return 0
+    fi
+
+    # Validate the extracted date looks like ISO8601 (basic sanity check)
+    if [[ ! "$clean_date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$ ]]; then
+        echo "valid:unknown"
+        return 0
+    fi
 
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS: Parse as UTC (-u flag) since AWS times are UTC

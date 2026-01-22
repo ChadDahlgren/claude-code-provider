@@ -105,7 +105,8 @@ export function ssoLogin(profile) {
 }
 /**
  * Known AWS regions where Bedrock is available
- * Updated list based on AWS documentation - checked at runtime for actual access
+ * This list is a starting point - the user's profile region is always checked first
+ * even if not in this list, allowing new regions to work automatically.
  */
 const KNOWN_BEDROCK_REGIONS = [
     // US regions
@@ -117,28 +118,35 @@ const KNOWN_BEDROCK_REGIONS = [
     'eu-west-2', // London
     'eu-west-3', // Paris
     'eu-central-1', // Frankfurt
+    'eu-north-1', // Stockholm
     // Asia Pacific regions
     'ap-northeast-1', // Tokyo
     'ap-northeast-2', // Seoul
+    'ap-northeast-3', // Osaka
     'ap-southeast-1', // Singapore
     'ap-southeast-2', // Sydney
     'ap-south-1', // Mumbai
     // Other regions
     'ca-central-1', // Canada
     'sa-east-1', // Sao Paulo
+    'me-south-1', // Bahrain
+    'me-central-1', // UAE
+    'af-south-1', // Cape Town
 ];
 /**
  * Get list of Bedrock regions to check, prioritized by user's profile region
+ * IMPORTANT: User's profile region is ALWAYS included first, even if not in known list
+ * This allows new AWS regions to work without code updates
  */
 export function getBedrockRegions(profileDefaultRegion) {
-    // If user has a default region and it's a known Bedrock region, prioritize it
-    if (profileDefaultRegion && KNOWN_BEDROCK_REGIONS.includes(profileDefaultRegion)) {
-        return [
-            profileDefaultRegion,
-            ...KNOWN_BEDROCK_REGIONS.filter(r => r !== profileDefaultRegion)
-        ];
+    const regions = [...KNOWN_BEDROCK_REGIONS];
+    if (profileDefaultRegion) {
+        // Always prioritize user's region, even if not in known list
+        // This allows new regions to work without code updates
+        const filtered = regions.filter(r => r !== profileDefaultRegion);
+        return [profileDefaultRegion, ...filtered];
     }
-    return [...KNOWN_BEDROCK_REGIONS];
+    return regions;
 }
 /**
  * Find regions where the profile has Bedrock access with Claude models

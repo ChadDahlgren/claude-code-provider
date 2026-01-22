@@ -6,7 +6,7 @@ description: Configure and manage AWS Bedrock integration for Claude Code
 
 Manage AWS Bedrock configuration for Claude Code. Provides setup, status monitoring, authentication refresh, and configuration reset.
 
-**Shortcuts:** `/bedrock:status`, `/bedrock:refresh`, `/bedrock:mode`
+**Shortcuts:** `/bedrock:status`, `/bedrock:refresh`, `/bedrock:thinking`
 
 ## Step 1: Check Current State
 
