@@ -15,7 +15,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null || echo 
 # Check for shell operators that chain commands
 has_dangerous_patterns() {
     local cmd="$1"
-    # Reject: semicolon, &&, ||, pipe, subshell, backticks, redirection
+    # Reject: semicolon, &&, ||, pipe, subshell, backticks, redirection, newlines
     if [[ "$cmd" == *';'* ]] || \
        [[ "$cmd" == *'&&'* ]] || \
        [[ "$cmd" == *'||'* ]] || \
@@ -23,7 +23,8 @@ has_dangerous_patterns() {
        [[ "$cmd" == *'$('* ]] || \
        [[ "$cmd" == *'`'* ]] || \
        [[ "$cmd" == *'>'* ]] || \
-       [[ "$cmd" == *'<'* ]]; then
+       [[ "$cmd" == *'<'* ]] || \
+       [[ "$cmd" == *$'\n'* ]]; then
         return 0  # Has dangerous patterns
     fi
     return 1  # Safe
